@@ -16,18 +16,30 @@
  * limitations under the License.
  */
 
-package com.musik.web.controller;
+package com.musik.tests;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import com.google.common.base.Preconditions;
 
-@Controller
-public class PingController {
-    @RequestMapping(value = "/ping", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
-    public String getPong() {
-        return "PONG";
+import com.musik.io.AudioReader;
+
+import org.junit.Test;
+
+import java.io.IOException;
+import java.net.URL;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+
+public class AudioFileTests {
+    @Test
+    public void testRead() throws IOException {
+        URL resource = getClass().getResource("/sample.mp3");
+
+        Preconditions.checkNotNull(resource, "Sample mp3 file does not exists");
+
+        AudioReader reader = new AudioReader();
+        byte[] content = reader.read(resource.getFile());
+
+        assertThat(content.length, greaterThan(0));
     }
 }

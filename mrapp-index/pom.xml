@@ -13,10 +13,12 @@
 
     <properties>
         <scala.version>2.11.8</scala.version>
-        <scala.major.version>2.11</scala.major.version>
+        <scala.m.version>2.11</scala.m.version>
         <maven.scala.version>2.15.2</maven.scala.version>
         <spark.version>2.1.0</spark.version>
         <spark.kafka.version>0-10</spark.kafka.version>
+        <commons.math.version>3.6.1</commons.math.version>
+        <mp3spi.version>1.9.5.4</mp3spi.version>
     </properties>
 
     <dependencies>
@@ -34,24 +36,42 @@
 
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_${scala.major.version}</artifactId>
+            <artifactId>spark-core_${scala.m.version}</artifactId>
             <version>${spark.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.major.version}</artifactId>
+            <artifactId>spark-sql_${scala.m.version}</artifactId>
             <version>${spark.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-streaming-kafka-${spark.kafka.version}_${scala.major.version}</artifactId>
+            <artifactId>spark-streaming-kafka-${spark.kafka.version}_${scala.m.version}</artifactId>
             <version>${spark.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.soundlibs</groupId>
+            <artifactId>mp3spi</artifactId>
+            <version>${mp3spi.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>${commons.math.version}</version>
         </dependency>
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>test/resources</directory>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.scala-tools</groupId>
