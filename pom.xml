@@ -4,16 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.mrapp</groupId>
-    <artifactId>music-recognition</artifactId>
+    <groupId>com.musik</groupId>
+    <artifactId>musik</artifactId>
     <packaging>pom</packaging>
     <version>0.1</version>
 
     <modules>
-        <module>mrapp-web</module>
-        <module>mrapp-core</module>
-        <module>mrapp-index</module>
-        <module>mrapp-testing</module>
+        <module>musik-core</module>
+        <module>musik-index</module>
+        <module>musik-web</module>
+        <module>musik-testing</module>
     </modules>
 
     <properties>
@@ -25,7 +25,6 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>

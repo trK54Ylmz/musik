@@ -17,5 +17,5 @@ RUN cd /tmp \
     && tar -xf spark-2.1.0-bin-hadoop2.7.tgz \
     && cd spark-2.1.0-bin-hadoop2.7
 
-# expose Hadoop, Spark and SSH ports
+# Expose Hadoop, Spark and SSH ports
 EXPOSE 22 4040 8088 50070
