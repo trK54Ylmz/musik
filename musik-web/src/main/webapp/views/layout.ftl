@@ -8,9 +8,11 @@
 
     <title>${title} · Musik</title>
     <link rel="stylesheet" href="/assets/css/bootstrap.min.css"/>
+
+    <link rel="shortcut icon" href="/assets/images/favicon.png"/>
 </head>
 <body>
-<#macro content></#macro>
+<@content/>
 </body>
 <script src="/assets/js/jquery.min.js"></script>
 <script src="/assets/js/bootstrap.min.js"></script>

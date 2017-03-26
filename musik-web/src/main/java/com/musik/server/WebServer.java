@@ -60,7 +60,7 @@ public class WebServer {
         handler.setErrorHandler(null);
         handler.setContextPath("/");
         handler.setResourceBase(new ClassPathResource("webapp").getURI().toString());
-        handler.addServlet(new ServletHolder("default", new DispatcherServlet(context)), "/");
+        handler.addServlet(new ServletHolder("default", new DispatcherServlet(context)), "/*");
         handler.addEventListener(new ContextLoaderListener(context));
 
         return handler;
