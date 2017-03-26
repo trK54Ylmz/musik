@@ -16,25 +16,29 @@
  * limitations under the License.
  */
 
-package com.musik.index;
+package com.musik.index.functions
 
-import java.io.Serializable;
+import com.google.common.io.Files
+import com.musik.index.{ComplexNumber, Transformer}
+import org.apache.hadoop.io.{BytesWritable, Text}
 
-public class ComplexNumber implements Serializable {
-    private double real;
+object TimeToFrequency {
+  private[this] val transformer = new Transformer
 
-    private double imaginary;
-
-    public ComplexNumber(double real, double imaginary) {
-        this.real = real;
-        this.imaginary = imaginary;
+  /**
+    * Converts Hadoop input to frequency based
+    *
+    * @param obj the input that contains audio content
+    * @return the complex numbers array which is converted to frequency domain
+    */
+  def apply(obj: (Text, BytesWritable)): (String, Array[Array[ComplexNumber]]) = {
+    if (obj == null || obj._2 == null) {
+      return null
     }
 
-    public double getReal() {
-        return real;
-    }
+    val name = Files.getNameWithoutExtension(obj._1.toString)
+    val frequencyData = transformer.transform(obj._2.getBytes, obj._2.getBytes.length)
 
-    public double getImaginary() {
-        return imaginary;
-    }
+    (name, frequencyData)
+  }
 }

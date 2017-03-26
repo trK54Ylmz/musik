@@ -16,25 +16,31 @@
  * limitations under the License.
  */
 
-package com.musik.index;
+package com.musik.index
 
-import java.io.Serializable;
+import com.musik.config.ConfigFactory
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-public class ComplexNumber implements Serializable {
-    private double real;
+object StreamingApp extends App {
+  def main(args: Array[String]): Unit = {
+    var spark: SparkSession = null
 
-    private double imaginary;
+    val config = ConfigFactory.build()
 
-    public ComplexNumber(double real, double imaginary) {
-        this.real = real;
-        this.imaginary = imaginary;
+    try {
+      spark = SparkSession.builder()
+        .master(getMaster)
+        .getOrCreate()
+
+      val streaming = new StreamingContext(spark.sparkContext, Seconds(10))
+    } catch {
+      case t: Throwable => logger.fatal(t.getMessage, t)
+    } finally {
+      // shutdown spark session
+      if (spark != null) {
+        spark.stop
+      }
     }
-
-    public double getReal() {
-        return real;
-    }
-
-    public double getImaginary() {
-        return imaginary;
-    }
+  }
 }

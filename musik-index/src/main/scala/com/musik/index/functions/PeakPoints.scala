@@ -16,25 +16,21 @@
  * limitations under the License.
  */
 
-package com.musik.index;
+package com.musik.index.functions
 
-import java.io.Serializable;
+import com.musik.index.{ComplexNumber, Eliminator}
 
-public class ComplexNumber implements Serializable {
-    private double real;
+object PeakPoints {
+  private[this] val eliminator = new Eliminator
 
-    private double imaginary;
-
-    public ComplexNumber(double real, double imaginary) {
-        this.real = real;
-        this.imaginary = imaginary;
+  def apply(obj: (String, Array[Array[ComplexNumber]])): (String, Array[Array[ComplexNumber]]) = {
+    if (obj == null) {
+      return null
     }
 
-    public double getReal() {
-        return real;
-    }
+    val name = obj._1
+    val frequencyData = obj._2
 
-    public double getImaginary() {
-        return imaginary;
-    }
+    (name, eliminator.eliminate(frequencyData))
+  }
 }

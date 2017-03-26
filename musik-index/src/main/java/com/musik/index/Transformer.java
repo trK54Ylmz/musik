@@ -19,65 +19,77 @@
 package com.musik.index;
 
 import com.google.common.base.Preconditions;
+import com.google.common.hash.Hashing;
+
+import com.musik.Utils;
 
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
+import org.apache.log4j.Logger;
 
 public class Transformer {
+    private static final Logger LOGGER = Logger.getLogger(Transformer.class);
+
     private static final FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
 
-    public static final int DEFAULT_SIZE = 4096;
+    public static final int DEFAULT_SIZE = 262144;
 
     /**
      * Executes fast fourier transformation to given input array
      *
      * @param bytes the time based input
      * @param size  the sample size
-     * @param trim  approximate a number if sample size is a number which is not power of two
      * @return frequency based output data
      * @see <a href="https://goo.gl/hAzIYQ">https://en.wikipedia.org/wiki/Fast_Fourier_transform</a>
      */
-    public ComplexNumber[] transform(byte[] bytes, int size, boolean trim) {
+    public ComplexNumber[][] transform(byte[] bytes, int size) {
         Preconditions.checkArgument(size > 0, "Sample size must be greater than zero");
         Preconditions.checkArgument(bytes.length > 0, "Byte array is empty");
 
         // log_2 {size}
-        double log = (Math.log(size) / Math.log(2));
+        double sizeCheck = Math.log(size) / Math.log(2);
+
+        if (sizeCheck != (int) sizeCheck) {
+            throw new IllegalStateException(Utils.s("96 is not a power of 2", size));
+        }
+
+        // log_2 {size}
+        double log = (Math.log(bytes.length) / Math.log(2));
 
         // complex array size must be power of two
         if (log != (int) log) {
-            if (trim) {
-                int iterationSize = 1000;
-                int real = size;
+            log = 1 + (int) log;
 
-                for (int i = 2; i < iterationSize; i++) {
-                    if (Math.pow(2, i) > size) {
-                        size = (int) Math.pow(2, i - 1);
+            int newSize = (int) Math.pow(2.0, log);
+            byte[] temp = new byte[newSize];
 
-                        break;
-                    }
+            for (int i = 0; i < newSize; i++) {
+                if (i < size) {
+                    temp[i] = bytes[i];
+                } else {
+                    temp[i] = 0;
                 }
-
-                // probably iteration limit exceed
-                if (size == real || size > Integer.MAX_VALUE - 2) {
-                    String formatted = String.format("Sample array size '%d' is not a power of two " +
-                            "and approximated number '%d' is too big", real, size);
-
-                    throw new RuntimeException(formatted);
-                }
-            } else {
-                throw new NumberFormatException("Sample array size must be power of two");
             }
+
+            bytes = temp;
         }
 
+        // sampling interval
         int sampleSize = bytes.length / size;
 
-        ComplexNumber[] results = new ComplexNumber[sampleSize];
-        Complex[] complexes = new Complex[size];
+        if (LOGGER.isDebugEnabled()) {
+            String hash = Hashing.md5().hashBytes(bytes).toString().intern();
+
+            LOGGER.debug(Utils.s("Sample size is {0} for ''{1}''", size, hash));
+        }
+
+        ComplexNumber[][] results = new ComplexNumber[sampleSize][];
 
         for (int i = 0; i < sampleSize; i++) {
+            Complex[] complexes = new Complex[size];
+
             for (int j = 0; j < size; j++) {
                 complexes[j] = new Complex(bytes[(size * i) + j], 0);
             }
@@ -85,7 +97,13 @@ public class Transformer {
             Complex[] transform = FFT.transform(complexes, TransformType.FORWARD);
 
             for (int j = 0; j < transform.length; j++) {
-                results[i] = new ComplexNumber(transform[j].getReal(), transform[j].getImaginary());
+                if (j == 0) {
+                    results[i] = new ComplexNumber[transform.length];
+                }
+
+                Complex smooth = transform[j].log();
+
+                results[i][j] = new ComplexNumber(smooth.getReal(), smooth.getImaginary());
             }
         }
 

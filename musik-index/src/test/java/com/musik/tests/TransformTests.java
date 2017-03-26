@@ -20,6 +20,7 @@ package com.musik.tests;
 
 import com.google.common.base.Preconditions;
 
+import com.musik.Utils;
 import com.musik.index.ComplexNumber;
 import com.musik.index.Transformer;
 import com.musik.io.AudioReader;
@@ -30,6 +31,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -53,30 +55,23 @@ public class TransformTests {
 
     @Test
     public void testSimpleTransform() {
-        ComplexNumber[] results = TRANSFORMER.transform(bytes, Transformer.DEFAULT_SIZE, false);
+        ComplexNumber[][] results = TRANSFORMER.transform(Arrays.copyOfRange(bytes, 0, Transformer.DEFAULT_SIZE), Transformer.DEFAULT_SIZE);
 
         if (LOGGER.isDebugEnabled()) {
-            StringBuilder builder = new StringBuilder("Fourier transformation results are : ");
             for (int i = 0; i < results.length; i++) {
-                builder.append(results[i].getReal());
-                builder.append(":");
-                builder.append(results[i].getImaginary());
-                builder.append("i, ");
+                StringBuilder builder = new StringBuilder(Utils.s("Transformation for {0} : ", i));
+
+                for (int j = 0; j < results[i].length; j++) {
+                    builder.append(String.format("%1.2f", results[i][j].getReal()));
+                    builder.append(":");
+                    builder.append(String.format("%1.2f", results[i][j].getImaginary()));
+                    builder.append("i, ");
+                }
+
+                LOGGER.debug(builder.toString());
             }
 
-            LOGGER.debug(builder.toString());
-            LOGGER.debug("Transformed output size " + results.length);
-        }
-
-        assertThat(results.length, greaterThan(0));
-    }
-
-    @Test
-    public void testSensitiveTransform() {
-        ComplexNumber[] results = TRANSFORMER.transform(bytes, 96, true);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Transformed output size " + results.length);
+            LOGGER.debug("Transformed sample size " + results.length);
         }
 
         assertThat(results.length, greaterThan(0));

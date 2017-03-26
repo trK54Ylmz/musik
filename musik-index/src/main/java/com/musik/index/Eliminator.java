@@ -16,25 +16,24 @@
  * limitations under the License.
  */
 
-package com.musik.index.app
+package com.musik.index;
 
-import org.apache.spark.sql.SparkSession
+import org.apache.log4j.Logger;
 
-object StreamingApp extends App {
-  def main(args: Array[String]): Unit = {
-    var spark: SparkSession = null
+public class Eliminator {
+    private static final Logger LOGGER = Logger.getLogger(Eliminator.class);
 
-    try {
-      spark = SparkSession.builder()
-        .master(getMaster)
-        .getOrCreate()
-    } catch {
-      case t: Throwable => logger.fatal(t.getMessage, t)
-    } finally {
-      // shutdown spark session
-      if (spark != null) {
-        spark.stop
-      }
+    /**
+     * Calculates magnitude of a complex number
+     *
+     * @param number the complex number
+     * @return the magnitude
+     */
+    private double magnitude(ComplexNumber number) {
+        return Math.hypot(number.getReal(), number.getImaginary());
     }
-  }
+
+    public ComplexNumber[][] eliminate(ComplexNumber[][] points) {
+        return points;
+    }
 }

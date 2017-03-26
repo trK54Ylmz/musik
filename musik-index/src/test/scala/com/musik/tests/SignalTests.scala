@@ -16,25 +16,24 @@
  * limitations under the License.
  */
 
-package com.musik.index.app
+package com.musik.tests
 
-import org.apache.spark.sql.SparkSession
+import com.musik.index.functions.AudioHash
+import com.musik.io.AudioReader
+import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
-object BatchApp extends App {
-  def main(args: Array[String]): Unit = {
-    var spark: SparkSession = null
+class SignalTests extends FunSuite with BeforeAndAfter with Matchers {
+  val reader = new AudioReader
 
-    try {
-      spark = SparkSession.builder()
-        .master(getMaster)
-        .getOrCreate()
-    } catch {
-      case t: Throwable => logger.fatal(t.getMessage, t)
-    } finally {
-      // shutdown spark session
-      if (spark != null) {
-        spark.stop
-      }
-    }
+  var bytes: Array[Byte] = _
+
+  before {
+    val path = classOf[SignalTests].getResource("/sample.mp3").getFile
+
+    bytes = reader.read(path)
+  }
+
+  test("simple audio hash") {
+    // add tests
   }
 }

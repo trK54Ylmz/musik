@@ -16,25 +16,13 @@
  * limitations under the License.
  */
 
-package com.musik.index;
+package com.musik.index.functions
 
-import java.io.Serializable;
+import com.musik.db.entity.SongContent
+import com.musik.index.ComplexNumber
 
-public class ComplexNumber implements Serializable {
-    private double real;
-
-    private double imaginary;
-
-    public ComplexNumber(double real, double imaginary) {
-        this.real = real;
-        this.imaginary = imaginary;
-    }
-
-    public double getReal() {
-        return real;
-    }
-
-    public double getImaginary() {
-        return imaginary;
-    }
+object AudioHash {
+  def apply(obj: (String, Array[Array[ComplexNumber]])): Array[SongContent] = {
+    null
+  }
 }

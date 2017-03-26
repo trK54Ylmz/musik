@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.musik.index.app
+package com.musik.index
 
 import java.util.Properties
 
@@ -25,7 +25,7 @@ import com.musik.config.{ConfigFactory, Configs}
 import org.apache.log4j.Logger
 
 trait App {
-  private[app] val logger: Logger = Logger.getLogger(this.getClass)
+  private[index] val logger: Logger = Logger.getLogger(getClass)
 
   val config: Properties = ConfigFactory.build().set(Configs.INDEX).load()
 
