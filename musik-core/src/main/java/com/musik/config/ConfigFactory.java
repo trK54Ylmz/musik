@@ -30,6 +30,7 @@ public class ConfigFactory {
     private String path;
 
     private ConfigFactory() {
+        // ignore this block
     }
 
     public ConfigFactory set(Configs sys) {
@@ -37,7 +38,7 @@ public class ConfigFactory {
             throw new NullPointerException(sys.getPath() + " is empty");
         }
 
-        this.path = System.getProperty(sys.getPath());
+        path = System.getProperty(sys.getPath());
 
         return this;
     }

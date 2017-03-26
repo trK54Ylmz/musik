@@ -13,3 +13,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import logging
+
+
+class Logger(object):
+    format = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
+
+    logging.basicConfig(format=format)
+
+    @staticmethod
+    def get_logger(name):
+        """
+        Returns instance of logging
+
+        :param name: the name of the current logger
+        :return: the logging instance
+        """
+        return logging.getLogger(name)

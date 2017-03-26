@@ -13,3 +13,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from pydub import AudioSegment
+
+from musik.utils.log import Logger
+
+
+class AudioReader(object):
+    logger = Logger.get_logger(__name__)
+
+    def __init__(self, file_path):
+        if not file_path:
+            self.audio = None
+
+        self.audio = AudioSegment.from_mp3(file_path)
+
+    def get_data(self):
+        return self.audio
