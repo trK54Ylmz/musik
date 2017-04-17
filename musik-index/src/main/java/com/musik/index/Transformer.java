@@ -48,11 +48,16 @@ public class Transformer {
         Preconditions.checkArgument(size > 0, "Sample size must be greater than zero");
         Preconditions.checkArgument(bytes.length > 0, "Byte array is empty");
 
+        // for the extreme cases
+        if (bytes.length < size) {
+            size = bytes.length;
+        }
+
         // log_2 {size}
         double sizeCheck = Math.log(size) / Math.log(2);
 
         if (sizeCheck != (int) sizeCheck) {
-            throw new IllegalStateException(Utils.s("96 is not a power of 2", size));
+            throw new IllegalStateException(Utils.s("{0} is not a power of 2", size));
         }
 
         // log_2 {size}
@@ -66,7 +71,7 @@ public class Transformer {
             byte[] temp = new byte[newSize];
 
             for (int i = 0; i < newSize; i++) {
-                if (i < size) {
+                if (i < bytes.length) {
                     temp[i] = bytes[i];
                 } else {
                     temp[i] = 0;
@@ -96,14 +101,12 @@ public class Transformer {
 
             Complex[] transform = FFT.transform(complexes, TransformType.FORWARD);
 
-            for (int j = 0; j < transform.length; j++) {
+            for (int j = 0, length = transform.length / 2; j < length; j++) {
                 if (j == 0) {
-                    results[i] = new ComplexNumber[transform.length];
+                    results[i] = new ComplexNumber[length];
                 }
 
-                Complex smooth = transform[j].log();
-
-                results[i][j] = new ComplexNumber(smooth.getReal(), smooth.getImaginary());
+                results[i][j] = new ComplexNumber(transform[j].getReal(), transform[j].getImaginary());
             }
         }
 

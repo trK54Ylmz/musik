@@ -18,6 +18,34 @@
 
 package com.musik.index.transport
 
-class KafkaTransport {
+import java.util.Properties
 
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.common.serialization.BytesDeserializer
+import org.apache.spark.streaming.StreamingContext
+import org.apache.spark.streaming.dstream.InputDStream
+import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
+import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
+import org.apache.spark.streaming.kafka010._
+import org.codehaus.jackson.map.deser.std.StringDeserializer
+
+class KafkaTransport(config: Properties) {
+  def getParams: Map[String, Object] = Map[String, Object](
+    "bootstrap.servers" -> config.getProperty("kafka_servers"),
+    "key.deserializer" -> classOf[StringDeserializer],
+    "value.deserializer" -> classOf[BytesDeserializer],
+    "group.id" -> "use_a_separate_group_id_for_each_stream",
+    "auto.offset.reset" -> "latest",
+    "enable.auto.commit" -> (false: java.lang.Boolean)
+  )
+
+  def getKafkaStream(streaming: StreamingContext): InputDStream[ConsumerRecord[String, Array[Byte]]] = {
+    val topics = config.getProperty("topics").split(",")
+
+    KafkaUtils.createDirectStream[String, Array[Byte]](
+      streaming,
+      PreferConsistent,
+      Subscribe[String, Array[Byte]](topics, getParams)
+    )
+  }
 }

@@ -16,26 +16,15 @@
  * limitations under the License.
  */
 
-package com.musik.index;
+package com.musik.tests;
 
-import org.apache.log4j.Logger;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.util.Arrays;
-
-public class Eliminator {
-    private static final Logger LOGGER = Logger.getLogger(Eliminator.class);
-
-    public ComplexNumber[][] eliminate(ComplexNumber[][] points) {
-        for (int i = 0; i < points.length; i++) {
-            double[] magnitudes = new double[points[i].length];
-
-            for (int j = 0; j < points[i].length; j++) {
-                magnitudes[j] = points[i][j].abs();
-            }
-
-            System.out.println(Arrays.toString(magnitudes));
-        }
-
-        return points;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Exclusive {
+    String value() default "";
 }

@@ -18,28 +18,21 @@
 
 package com.musik.tests;
 
-import com.google.common.base.Preconditions;
-
-import com.musik.io.AudioReader;
-
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URL;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 
-public class AudioFileTests {
+public class AudioFileTests extends TestUtil {
     @Test
     public void testRead() throws IOException {
-        URL resource = getClass().getResource("/sample.mp3");
+        assertThat(bytes.length, greaterThan(0));
+    }
 
-        Preconditions.checkNotNull(resource, "Sample mp3 file does not exists");
-
-        AudioReader reader = new AudioReader();
-        byte[] content = reader.read(resource.getFile());
-
-        assertThat(content.length, greaterThan(0));
+    @Test
+    public void drawWaveForm() throws IOException {
+        draw(bytes, "original-output");
     }
 }

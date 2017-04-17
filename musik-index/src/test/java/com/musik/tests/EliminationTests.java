@@ -16,26 +16,28 @@
  * limitations under the License.
  */
 
-package com.musik.index;
+package com.musik.tests;
+
+import com.musik.index.ComplexNumber;
+import com.musik.index.Eliminator;
+import com.musik.index.Transformer;
 
 import org.apache.log4j.Logger;
+import org.junit.Test;
 
-import java.util.Arrays;
+public class EliminationTests extends TestUtil {
+    protected static final Logger LOGGER = Logger.getLogger(TestUtil.class);
 
-public class Eliminator {
-    private static final Logger LOGGER = Logger.getLogger(Eliminator.class);
+    protected static final Transformer TRANSFORMER = new Transformer();
 
-    public ComplexNumber[][] eliminate(ComplexNumber[][] points) {
-        for (int i = 0; i < points.length; i++) {
-            double[] magnitudes = new double[points[i].length];
+    private static final Eliminator ELIMINATOR = new Eliminator();
 
-            for (int j = 0; j < points[i].length; j++) {
-                magnitudes[j] = points[i][j].abs();
-            }
+    @Test
+    public void testSimple() {
+        ComplexNumber[][] numbers = TRANSFORMER.transform(bytes, Transformer.DEFAULT_SIZE);
 
-            System.out.println(Arrays.toString(magnitudes));
-        }
+        ComplexNumber[][] eleminated = ELIMINATOR.eliminate(numbers);
 
-        return points;
+
     }
 }

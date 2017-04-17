@@ -37,4 +37,13 @@ public class ComplexNumber implements Serializable {
     public double getImaginary() {
         return imaginary;
     }
+
+    /**
+     * Calculates magnitude of a complex number
+     *
+     * @return the magnitude
+     */
+    public double abs() {
+        return Math.hypot(real, imaginary);
+    }
 }

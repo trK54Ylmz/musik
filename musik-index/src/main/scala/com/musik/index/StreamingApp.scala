@@ -18,15 +18,17 @@
 
 package com.musik.index
 
-import com.musik.config.ConfigFactory
+import com.musik.config.{ConfigFactory, Configs}
+import com.musik.index.transport.KafkaTransport
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 object StreamingApp extends App {
   def main(args: Array[String]): Unit = {
     var spark: SparkSession = null
+    val streaming: StreamingContext = null
 
-    val config = ConfigFactory.build()
+    val config = ConfigFactory.build().set(Configs.INDEX).load()
 
     try {
       spark = SparkSession.builder()
@@ -34,9 +36,20 @@ object StreamingApp extends App {
         .getOrCreate()
 
       val streaming = new StreamingContext(spark.sparkContext, Seconds(10))
+
+      val kafka = new KafkaTransport(config)
+
+      val stream = kafka.getKafkaStream(streaming)
+
+      stream.map(d => (d.key(), d.value()))
     } catch {
       case t: Throwable => logger.fatal(t.getMessage, t)
     } finally {
+      // shutdown streaming context
+      if (streaming != null) {
+        streaming.awaitTermination()
+      }
+
       // shutdown spark session
       if (spark != null) {
         spark.stop

@@ -18,52 +18,52 @@
 
 package com.musik.tests;
 
-import com.google.common.base.Preconditions;
-
 import com.musik.Utils;
 import com.musik.index.ComplexNumber;
 import com.musik.index.Transformer;
-import com.musik.io.AudioReader;
 
 import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 
-public class TransformTests {
+@RunWith(SystemPropertyRunner.class)
+public class TransformTests extends TestUtil {
     private static final Logger LOGGER = Logger.getLogger(Transformer.class);
 
     private static final Transformer TRANSFORMER = new Transformer();
 
-    private static byte[] bytes;
+    @Test
+    public void testSimpleTransform() {
+        byte[] range = {1, 1, 1, 1, 1, 1, 1, 1};
 
-    @BeforeClass
-    public static void setUp() throws IOException {
-        URL resource = TRANSFORMER.getClass().getResource("/sample.mp3");
+        ComplexNumber[][] results = TRANSFORMER.transform(range, range.length);
 
-        Preconditions.checkNotNull(resource, "Sample mp3 file does not exists");
+        assertThat(results.length, greaterThan(0));
 
-        AudioReader reader = new AudioReader();
-        bytes = reader.read(resource.getFile());
+        // the first complex number of FFT array must be equal to 8.0
+        assertThat(results[0][0].abs(), equalTo(8.0));
     }
 
     @Test
-    public void testSimpleTransform() {
-        ComplexNumber[][] results = TRANSFORMER.transform(Arrays.copyOfRange(bytes, 0, Transformer.DEFAULT_SIZE), Transformer.DEFAULT_SIZE);
+    public void testSimpleFileTransform() {
+        byte[] range = Arrays.copyOfRange(bytes, 0, Transformer.DEFAULT_SIZE);
+
+        ComplexNumber[][] results = TRANSFORMER.transform(range, Transformer.DEFAULT_SIZE);
 
         if (LOGGER.isDebugEnabled()) {
             for (int i = 0; i < results.length; i++) {
                 StringBuilder builder = new StringBuilder(Utils.s("Transformation for {0} : ", i));
 
-                for (int j = 0; j < results[i].length; j++) {
+                for (int j = 0; j < Math.min(20, results[i].length); j++) {
                     builder.append(String.format("%1.2f", results[i][j].getReal()));
-                    builder.append(":");
+                    builder.append(" ");
                     builder.append(String.format("%1.2f", results[i][j].getImaginary()));
                     builder.append("i, ");
                 }
@@ -75,5 +75,68 @@ public class TransformTests {
         }
 
         assertThat(results.length, greaterThan(0));
+    }
+
+    @Exclusive
+    @Test
+    public void drawSimpleTransformedWaveForm() throws IOException {
+        int size = bytes.length;
+
+        double log = Math.log(bytes.length) / Math.log(2);
+        if (log != (int) log) {
+            size = (int) Math.pow(2, (int) log + 1);
+        }
+
+        byte[] range;
+        if (size == bytes.length) {
+            range = Arrays.copyOfRange(bytes, 0, bytes.length);
+        } else {
+            range = new byte[size];
+
+            for (int i = 0; i < size; i++) {
+                if (i < bytes.length) {
+                    range[i] = bytes[i];
+                } else {
+                    range[i] = 0;
+                }
+            }
+        }
+
+        ComplexNumber[][] results = TRANSFORMER.transform(range, size);
+
+        byte[] flat = new byte[results.length * results[0].length];
+
+        for (int i = 0; i < results.length; i++) {
+            for (int j = 0; j < results[i].length; j++) {
+                flat[i + j] = (byte) Math.sqrt(Math.pow(results[i][j].getReal(), 2) + Math.pow(results[i][j].getImaginary(), 2));
+            }
+        }
+
+        double sample = bytes.length / flat.length;
+
+        LOGGER.debug(Utils.s("data : {0}, fft : {1}, sample : {2}", bytes.length, flat.length, sample));
+
+        draw(flat, "output-fft");
+    }
+
+    @Exclusive
+    @Test
+    public void drawSampledTransformedWaveForm() throws IOException {
+        byte[] range = Arrays.copyOfRange(bytes, 0, bytes.length);
+
+        ComplexNumber[][] results = TRANSFORMER.transform(range, Transformer.DEFAULT_SIZE);
+        for (int i = 0; i < results.length; i++) {
+            byte[] flat = new byte[results[i].length];
+
+            for (int j = 0; j < results[i].length; j++) {
+                flat[j] = (byte) Math.sqrt(Math.pow(results[i][j].getReal(), 2) + Math.pow(results[i][j].getImaginary(), 2));
+            }
+
+            double sample = bytes.length / flat.length;
+
+            LOGGER.debug(Utils.s("data : {0}, fft : {1}, sample : {2}", bytes.length, flat.length, sample));
+
+            draw(flat, "output-sampled-fft-" + (i + 1));
+        }
     }
 }
