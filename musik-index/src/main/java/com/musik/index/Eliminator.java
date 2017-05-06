@@ -18,24 +18,59 @@
 
 package com.musik.index;
 
-import org.apache.log4j.Logger;
-
 import java.util.Arrays;
 
 public class Eliminator {
-    private static final Logger LOGGER = Logger.getLogger(Eliminator.class);
+    private static final int LIMIT = 16;
 
-    public ComplexNumber[][] eliminate(ComplexNumber[][] points) {
-        for (int i = 0; i < points.length; i++) {
-            double[] magnitudes = new double[points[i].length];
-
-            for (int j = 0; j < points[i].length; j++) {
-                magnitudes[j] = points[i][j].abs();
+    /**
+     * Checks the magnitudes
+     *
+     * @return TRUE if all magnitudes are zero, FALSE otherwise
+     */
+    private boolean isCorrect(byte[] magnitudes) {
+        for (int i = 0; i < magnitudes.length; i++) {
+            if (magnitudes[i] <= 0) {
+                continue;
             }
 
-            System.out.println(Arrays.toString(magnitudes));
+            return false;
         }
 
-        return points;
+        return true;
+    }
+
+    /**
+     * Eliminates
+     *
+     * @param points the frequency points
+     * @return the peek points of transformed signals
+     */
+    public byte[][] eliminate(ComplexNumber[][] points) {
+        byte[][] eliminated = new byte[points.length][];
+
+        for (int i = 0; i < points.length; i++) {
+            byte[] sample = new byte[points[i].length];
+
+            for (int j = 0; j < points[i].length; j++) {
+                double real = points[i][j].getReal();
+                double imaginary = points[i][j].getImaginary();
+                double magnitude = real * real + imaginary * imaginary;
+
+                magnitude = Math.sqrt(magnitude);
+
+                sample[j] = (byte) (16 * Math.log10(magnitude));
+            }
+
+            if (isCorrect(sample)) {
+                continue;
+            }
+
+            Arrays.sort(sample);
+
+            eliminated[i] = Arrays.copyOfRange(sample, sample.length - LIMIT, sample.length);
+        }
+
+        return eliminated;
     }
 }

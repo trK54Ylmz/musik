@@ -45,7 +45,7 @@ public abstract class TestUtil {
         bytes = reader.read(resource.getFile());
     }
 
-    static void draw(byte[] bytes, String name) throws IOException {
+    static void draw(int[] bytes, String name) throws IOException {
         int width = bytes.length;
         int height = 0;
 

@@ -94,6 +94,12 @@ public class SystemPropertyRunner extends Runner {
         return Description.createSuiteDescription(tc.getName(), tc.getJavaClass().getAnnotations());
     }
 
+    /**
+     * Invoke Java method
+     *
+     * @param method the public method of test class
+     * @param cls    the test class
+     */
     private void invoke(Method method, Class<?> cls)
             throws IllegalAccessException, InvocationTargetException, InstantiationException {
         method.invoke(cls.getConstructors()[0].newInstance());
@@ -116,7 +122,7 @@ public class SystemPropertyRunner extends Runner {
 
                 notifier.fireTestStarted(desc);
 
-                method.invoke(tc.getJavaClass().getConstructors()[0].newInstance());
+                invoke(method, tc.getJavaClass());
 
                 notifier.fireTestFinished(desc);
             } catch (Exception e) {

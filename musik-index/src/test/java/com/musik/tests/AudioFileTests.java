@@ -33,6 +33,12 @@ public class AudioFileTests extends TestUtil {
 
     @Test
     public void drawWaveForm() throws IOException {
-        draw(bytes, "original-output");
+        int[] numbers = new int[bytes.length];
+
+        for (int i = 0; i < bytes.length; i++) {
+            numbers[i] = (int) bytes[i];
+        }
+
+        draw(numbers, "original-output");
     }
 }

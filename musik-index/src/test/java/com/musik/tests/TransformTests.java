@@ -52,7 +52,7 @@ public class TransformTests extends TestUtil {
     }
 
     @Test
-    public void testSimpleFileTransform() {
+    public void testFileTransform() {
         byte[] range = Arrays.copyOfRange(bytes, 0, Transformer.DEFAULT_SIZE);
 
         ComplexNumber[][] results = TRANSFORMER.transform(range, Transformer.DEFAULT_SIZE);
@@ -79,44 +79,26 @@ public class TransformTests extends TestUtil {
 
     @Exclusive
     @Test
-    public void drawSimpleTransformedWaveForm() throws IOException {
-        int size = bytes.length;
+    public void testSampledTransform() throws IOException {
+        byte[] sample = new byte[2048];
 
-        double log = Math.log(bytes.length) / Math.log(2);
-        if (log != (int) log) {
-            size = (int) Math.pow(2, (int) log + 1);
+        int j = 0;
+        for (int i = 10000; i < 12048; i++) {
+            sample[j] = bytes[i];
+
+            j++;
         }
 
-        byte[] range;
-        if (size == bytes.length) {
-            range = Arrays.copyOfRange(bytes, 0, bytes.length);
-        } else {
-            range = new byte[size];
+        Transformer transformer = new Transformer();
+        ComplexNumber[][] numbers = transformer.transform(sample, sample.length);
 
-            for (int i = 0; i < size; i++) {
-                if (i < bytes.length) {
-                    range[i] = bytes[i];
-                } else {
-                    range[i] = 0;
-                }
-            }
+        int[] sizes = new int[numbers[0].length];
+
+        for (int i = 0; i < numbers[0].length; i++) {
+            sizes[i] = (int) (numbers[0][i].abs() / 24);
         }
 
-        ComplexNumber[][] results = TRANSFORMER.transform(range, size);
-
-        byte[] flat = new byte[results.length * results[0].length];
-
-        for (int i = 0; i < results.length; i++) {
-            for (int j = 0; j < results[i].length; j++) {
-                flat[i + j] = (byte) Math.sqrt(Math.pow(results[i][j].getReal(), 2) + Math.pow(results[i][j].getImaginary(), 2));
-            }
-        }
-
-        double sample = bytes.length / flat.length;
-
-        LOGGER.debug(Utils.s("data : {0}, fft : {1}, sample : {2}", bytes.length, flat.length, sample));
-
-        draw(flat, "output-fft");
+        draw(sizes, "test-fft-sampled");
     }
 
     @Exclusive
@@ -126,10 +108,10 @@ public class TransformTests extends TestUtil {
 
         ComplexNumber[][] results = TRANSFORMER.transform(range, Transformer.DEFAULT_SIZE);
         for (int i = 0; i < results.length; i++) {
-            byte[] flat = new byte[results[i].length];
+            int[] flat = new int[results[i].length];
 
             for (int j = 0; j < results[i].length; j++) {
-                flat[j] = (byte) Math.sqrt(Math.pow(results[i][j].getReal(), 2) + Math.pow(results[i][j].getImaginary(), 2));
+                flat[j] = (int) (results[i][j].abs() / 24);
             }
 
             double sample = bytes.length / flat.length;

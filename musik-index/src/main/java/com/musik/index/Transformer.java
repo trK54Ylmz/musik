@@ -34,7 +34,7 @@ public class Transformer {
 
     private static final FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
 
-    public static final int DEFAULT_SIZE = 262144;
+    public static final int DEFAULT_SIZE = 16384;
 
     /**
      * Executes fast fourier transformation to given input array
@@ -48,11 +48,6 @@ public class Transformer {
         Preconditions.checkArgument(size > 0, "Sample size must be greater than zero");
         Preconditions.checkArgument(bytes.length > 0, "Byte array is empty");
 
-        // for the extreme cases
-        if (bytes.length < size) {
-            size = bytes.length;
-        }
-
         // log_2 {size}
         double sizeCheck = Math.log(size) / Math.log(2);
 
@@ -60,14 +55,13 @@ public class Transformer {
             throw new IllegalStateException(Utils.s("{0} is not a power of 2", size));
         }
 
-        // log_2 {size}
-        double log = (Math.log(bytes.length) / Math.log(2));
+        double log = (bytes.length / size);
 
         // complex array size must be power of two
         if (log != (int) log) {
             log = 1 + (int) log;
 
-            int newSize = (int) Math.pow(2.0, log);
+            int newSize = size * (int) log;
             byte[] temp = new byte[newSize];
 
             for (int i = 0; i < newSize; i++) {
@@ -101,7 +95,7 @@ public class Transformer {
 
             Complex[] transform = FFT.transform(complexes, TransformType.FORWARD);
 
-            for (int j = 0, length = transform.length / 2; j < length; j++) {
+            for (int j = 0, length = transform.length / 2 + 1; j < length; j++) {
                 if (j == 0) {
                     results[i] = new ComplexNumber[length];
                 }

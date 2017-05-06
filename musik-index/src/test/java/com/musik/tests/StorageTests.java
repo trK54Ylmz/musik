@@ -16,29 +16,13 @@
  * limitations under the License.
  */
 
-package com.musik.index.functions
+package com.musik.tests;
 
-import com.google.common.io.Files
-import com.musik.index.{ComplexNumber, Transformer}
-import org.apache.hadoop.io.{BytesWritable, Text}
+import org.junit.Test;
 
-object TimeToFrequency {
-  private[this] val transformer = new Transformer
+public class StorageTests extends TestUtil {
+    @Test
+    public void testDbWrites() {
 
-  /**
-    * Converts Hadoop input to frequency based complex numbers
-    *
-    * @param obj the input that contains audio content
-    * @return the complex numbers array which is converted to frequency domain
-    */
-  def apply(obj: (Text, BytesWritable)): (String, Array[Array[ComplexNumber]]) = {
-    if (obj == null || obj._2 == null) {
-      return null
     }
-
-    val name = Files.getNameWithoutExtension(obj._1.toString)
-    val frequencyData = transformer.transform(obj._2.getBytes, obj._2.getBytes.length)
-
-    (name, frequencyData)
-  }
 }
