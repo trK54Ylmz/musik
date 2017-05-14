@@ -16,31 +16,17 @@
  * limitations under the License.
  */
 
-package com.musik;
+package com.musik.config;
 
-import com.musik.config.Config;
-import com.musik.config.ConfigFactory;
-import com.musik.server.WebServer;
+public class Config {
+    @Argument
+    private Integer port;
 
-import org.apache.log4j.Logger;
+    public Integer getPort() {
+        return port;
+    }
 
-public class WebApp {
-    private static final Logger LOGGER = Logger.getLogger(WebApp.class);
-
-    public static void main(String[] args) {
-        final Config config = ConfigFactory.load(args, Config.class);
-
-        final WebServer server = new WebServer(config);
-
-        // wait for kill signal
-        Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
-
-        try {
-            LOGGER.info("Web server starting ...");
-
-            server.start();
-        } catch (Throwable t) {
-            LOGGER.fatal(t.getMessage(), t);
-        }
+    public void setPort(Integer port) {
+        this.port = port;
     }
 }

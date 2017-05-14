@@ -38,7 +38,7 @@ object AudioHash {
     val name = obj._1
     val hashes = hash.generate(obj._2)
 
-    val songs = for (i <- 0 until hashes.length) yield new SongContent(name, i, hashes(i))
+    val songs = for (i <- 0 until hashes.length) yield new SongContent(hashes(i), i, name)
 
     songs.toArray
   }

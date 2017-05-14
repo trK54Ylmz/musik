@@ -16,31 +16,19 @@
  * limitations under the License.
  */
 
-package com.musik;
+package com.musik.config;
 
-import com.musik.config.Config;
-import com.musik.config.ConfigFactory;
-import com.musik.server.WebServer;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.apache.log4j.Logger;
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface Argument {
+    String value() default "";
 
-public class WebApp {
-    private static final Logger LOGGER = Logger.getLogger(WebApp.class);
+    boolean hasValue() default true;
 
-    public static void main(String[] args) {
-        final Config config = ConfigFactory.load(args, Config.class);
-
-        final WebServer server = new WebServer(config);
-
-        // wait for kill signal
-        Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
-
-        try {
-            LOGGER.info("Web server starting ...");
-
-            server.start();
-        } catch (Throwable t) {
-            LOGGER.fatal(t.getMessage(), t);
-        }
-    }
+    String description() default "";
 }

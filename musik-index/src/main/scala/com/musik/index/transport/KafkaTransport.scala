@@ -20,32 +20,87 @@ package com.musik.index.transport
 
 import java.util.Properties
 
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.common.serialization.BytesDeserializer
-import org.apache.spark.streaming.StreamingContext
-import org.apache.spark.streaming.dstream.InputDStream
-import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
-import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
-import org.apache.spark.streaming.kafka010._
-import org.codehaus.jackson.map.deser.std.StringDeserializer
+import com.musik.config.streaming.Config
+import org.apache.commons.io.Charsets
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.java.tuple.Tuple2
+import org.apache.flink.api.java.typeutils.TupleTypeInfo
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
+import org.apache.flink.streaming.util.serialization.KeyedDeserializationSchema
 
-class KafkaTransport(config: Properties) {
-  def getParams: Map[String, Object] = Map[String, Object](
-    "bootstrap.servers" -> config.getProperty("kafka_servers"),
-    "key.deserializer" -> classOf[StringDeserializer],
-    "value.deserializer" -> classOf[BytesDeserializer],
-    "group.id" -> "use_a_separate_group_id_for_each_stream",
-    "auto.offset.reset" -> "latest",
-    "enable.auto.commit" -> (false: java.lang.Boolean)
-  )
+class KafkaTransport extends BaseApp {
+  type StringBytePairs = Tuple2[String, Array[Byte]]
 
-  def getKafkaStream(streaming: StreamingContext): InputDStream[ConsumerRecord[String, Array[Byte]]] = {
-    val topics = config.getProperty("topics").split(",")
+  val schema = new KeyedDeserializationSchema[StringBytePairs] {
+    // kafka key type information
+    val stringInfo: TypeInformation[String] = TypeInformation.of(classOf[String])
 
-    KafkaUtils.createDirectStream[String, Array[Byte]](
-      streaming,
-      PreferConsistent,
-      Subscribe[String, Array[Byte]](topics, getParams)
-    )
+    // kafka value type information
+    val bytesInfo: TypeInformation[Array[Byte]] = TypeInformation.of(classOf[Array[Byte]])
+
+    // kafka io format description
+    val typeInfo = new TupleTypeInfo[StringBytePairs](stringInfo, bytesInfo)
+
+    /**
+      * Method to decide whether the element signals the end of the stream. If
+      * true is returned the element won't be emitted
+      *
+      * @param element the
+      * @return TRUE if element signal end of the stream, FALSE otherwise
+      */
+    override def isEndOfStream(element: StringBytePairs): Boolean = false
+
+    /**
+      * De-serializes the byte message
+      *
+      * @param keys      the key as byte array
+      * @param values    the value as byte array
+      * @param topic     the name of the topic
+      * @param partition the kafka partition
+      * @param offset    the kafka offset
+      * @return the de-serialized message
+      */
+    override def deserialize(keys: Array[Byte],
+                             values: Array[Byte],
+                             topic: String,
+                             partition: Int,
+                             offset: Long): StringBytePairs = {
+      Tuple2.of(new String(keys, Charsets.UTF_8), values)
+    }
+
+    /**
+      * The type definition
+      *
+      * @return the type definition
+      */
+    override def getProducedType: TypeInformation[StringBytePairs] = typeInfo
+  }
+
+  /**
+    * Creates Kafka topic parameters
+    *
+    * @param config the application configuration
+    * @return the kafka parameters
+    */
+  def getParams(config: Config): Properties = {
+    val properties = new Properties
+    properties.setProperty("bootstrap.servers", config.getKafkaServers)
+    properties.setProperty("zookeeper.connect", config.getZookeeperServers)
+    properties.setProperty("group.id", config.getGroupId)
+
+    properties
+  }
+
+  /**
+    * Generates Kafka stream source
+    *
+    * @param config the configuration class that generated for application
+    * @return the Kafka 0.10.x consumer
+    */
+  def getKafkaStream(config: Config): FlinkKafkaConsumer010[StringBytePairs] = {
+    val topics = config.getKafkaTopics
+    val properties = getParams(config)
+
+    new FlinkKafkaConsumer010[StringBytePairs](topics, schema, properties)
   }
 }

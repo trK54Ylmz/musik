@@ -16,29 +16,23 @@
  * limitations under the License.
  */
 
-package com.musik.index
+package com.musik.tests;
 
-import java.util.Properties
+import com.musik.config.ConfigFactory;
 
-import com.google.common.base.Preconditions
-import com.musik.config.{ConfigFactory, Configs}
-import org.apache.log4j.Logger
+import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
-trait App {
-  private[index] val logger: Logger = Logger.getLogger(getClass)
+public class ConfigTests {
+    @Test
+    public void testConfigParse() {
+        final String[] args = {"-name", "Test", "-age", "20", "-income", "1000.0"};
 
-  val config: Properties = ConfigFactory.build().set(Configs.INDEX).load()
+        final Config config = ConfigFactory.load(args, Config.class);
 
-  /**
-    * Returns Spark app master according to app.master parameter of configuration file
-    *
-    * @return Returns name of app master
-    */
-  def getMaster: String = {
-    val master = config.getProperty("app.master")
-
-    Preconditions.checkNotNull(master, "Config parameter 'app.master' is empty", null)
-
-    master
-  }
+        assertThat(config.getName(), is("Test"));
+        assertThat(config.getSalary(), is(1000.f));
+        assertThat(config.getAge(), is(20));
+    }
 }

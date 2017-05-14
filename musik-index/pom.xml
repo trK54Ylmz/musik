@@ -15,6 +15,8 @@
         <scala.version>2.11.8</scala.version>
         <scala.m.version>2.11</scala.m.version>
         <maven.scala.version>2.15.2</maven.scala.version>
+        <flink.version>1.2.1</flink.version>
+        <flink.kafka.version>0.10</flink.kafka.version>
         <spark.version>2.1.0</spark.version>
         <spark.kafka.version>0-10</spark.kafka.version>
         <spark.cassandra.version>2.0.1</spark.cassandra.version>
@@ -39,33 +41,51 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_${scala.m.version}</artifactId>
-            <version>${spark.version}</version>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-core</artifactId>
+            <version>${flink.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.m.version}</artifactId>
-            <version>${spark.version}</version>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-hadoop2</artifactId>
+            <version>${flink.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-streaming_${scala.m.version}</artifactId>
-            <version>${spark.version}</version>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-clients_${scala.m.version}</artifactId>
+            <version>${flink.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-streaming-kafka-${spark.kafka.version}_${scala.m.version}</artifactId>
-            <version>${spark.version}</version>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-hadoop-compatibility_${scala.m.version}</artifactId>
+            <version>${flink.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.datastax.spark</groupId>
-            <artifactId>spark-cassandra-connector_${scala.m.version}</artifactId>
-            <version>${spark.cassandra.version}</version>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-scala_${scala.m.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-scala_${scala.m.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka-${flink.kafka.version}_${scala.m.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-cassandra_${scala.m.version}</artifactId>
+            <version>${flink.version}</version>
         </dependency>
 
         <dependency>
@@ -139,6 +159,33 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.musik.index.BatchApp</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>make-streaming-app</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${project.artifactId}-streaming-${project.version}</finalName>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.musik.index.StreamingApp</mainClass>
                                 </transformer>
                             </transformers>
                             <filters>

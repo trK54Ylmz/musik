@@ -18,55 +18,54 @@
 
 package com.musik.index
 
-import java.util.Properties
-
-import com.musik.db.entity.SongContent
-import com.musik.fs.BinaryFileInputFormat
+import com.musik.config.ConfigFactory
+import com.musik.config.batch.Config
 import com.musik.index.functions.{AudioHash, PeakPoints, TimeToFrequency}
-import org.apache.hadoop.io.{BytesWritable, Text}
-import org.apache.spark.sql.SparkSession
+import com.musik.index.transport.CassandraTransport
+import org.apache.flink.api.scala.{ExecutionEnvironment, _}
+import org.apache.flink.batch.connectors.cassandra.CassandraOutputFormat
 
-object BatchApp extends App {
+object BatchApp extends CassandraTransport {
   def main(args: Array[String]): Unit = {
-    var spark: SparkSession = null
+    // load configuration according to command line arguments
+    val config = ConfigFactory.load(args, classOf[Config])
 
-    val input = config.getProperty("input")
-    val host = config.getProperty("host")
-    val port = config.getProperty("port")
-    val db = config.getProperty("db")
-    val username = config.getProperty("username")
-    val password = config.getProperty("username")
-    val table = config.getProperty("table")
-
-    val url = s"jdbc:mysql://$host:$port/$db"
-
-    val properties = new Properties()
-    properties.setProperty("driver", "com.mysql.jdbc.Driver")
-    properties.setProperty("user", username)
-    properties.setProperty("password", password)
+    val input = config.getInput
+    val host = config.getHost
+    val port = config.getPort.toInt
+    val db = config.getDb
+    val username = config.getUsername
+    val password = config.getPassword
+    val table = config.getTable
 
     try {
-      spark = SparkSession.builder().master(getMaster).getOrCreate()
+      // generate execution environment for the current application
+      val env = ExecutionEnvironment.getExecutionEnvironment
 
-      // read audio files from file system
-      val audios = spark
-        .sparkContext
-        .newAPIHadoopFile[Text, BytesWritable, BinaryFileInputFormat](input)
+      // create binary hadoop input format as a source
+      val source = env.createInput(getFormat(input))
 
-      val frequencies = audios.map(f => TimeToFrequency(f)).filter(f => f != null)
+      // convert flink's java tuples to scala tuples
+      val signals = source.map(f => (f.f0.toString, f.f1.getBytes))
 
-      val hashes = frequencies.map(p => PeakPoints(p)).map(p => AudioHash(p)).flatMap(p => p)
+      // transform time domain signals to frequency domain
+      val frequencies = signals.map(f => TimeToFrequency(f)).filter(f => f != null)
 
-      val rows = spark.createDataFrame(hashes, classOf[SongContent])
+      // find peak points of signal magnitudes
+      val points = frequencies.map(f => PeakPoints(f))
 
-      rows.write.jdbc(url, table, properties)
+      // generate hashes from magnitudes and generate row tuples from hashes
+      val rows = points.map(p => AudioHash(p)).flatMap(p => p).map(s => toTuple(s))
+
+      val sql = s"INSERT INTO $db.$table (hash, idx, name) VALUES (?, ?, ?)"
+      val cluster = getCluster(host, port, username, password)
+
+      // write tuples
+      rows.output(new CassandraOutputFormat[Tuple](sql, cluster))
+
+      env.execute()
     } catch {
       case t: Throwable => logger.fatal(t.getMessage, t)
-    } finally {
-      // shutdown spark session
-      if (spark != null) {
-        spark.stop
-      }
     }
   }
 }
