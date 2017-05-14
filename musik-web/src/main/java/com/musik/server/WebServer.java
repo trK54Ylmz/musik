@@ -18,8 +18,7 @@
 
 package com.musik.server;
 
-import com.musik.config.ConfigFactory;
-import com.musik.config.Configs;
+import com.musik.config.Config;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -31,17 +30,18 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.IOException;
-import java.util.Properties;
 
 public class WebServer {
-    private static final Properties CONFIG = ConfigFactory.build().set(Configs.WEB).load();
+    private final Config config;
 
     private Server server;
 
-    public void start() throws Exception {
-        final int port = Integer.parseInt(CONFIG.getProperty("port"));
+    public WebServer(Config config) {
+        this.config = config;
+    }
 
-        server = new Server(port);
+    public void start() throws Exception {
+        server = new Server(config.getPort());
         server.setHandler(getServletHandler(getContext()));
 
         server.start();

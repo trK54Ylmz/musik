@@ -16,18 +16,22 @@
  * limitations under the License.
  */
 
-package com.musik.config;
+package com.musik.index.transport
 
-public enum Configs {
-    WEB("web.config"), INDEX("index.config");
+import com.musik.db.entity.SongContent
+import org.apache.flink.api.java.tuple.Tuple3
+import org.apache.log4j.Logger
 
-    private String path;
+trait BaseApp {
+  private[index] val logger: Logger = Logger.getLogger(getClass)
 
-    Configs(String path) {
-        this.path = path;
-    }
+  type Tuple = Tuple3[String, Int, String]
 
-    public String getPath() {
-        return path;
-    }
+  /**
+    * Converts song entity to flink tuple
+    *
+    * @param song the song entity
+    * @return the flink tuple
+    */
+  def toTuple(song: SongContent): Tuple = new Tuple(song.getHash, song.getIdx, song.getName)
 }

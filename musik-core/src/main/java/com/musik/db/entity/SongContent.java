@@ -21,7 +21,7 @@ package com.musik.db.entity;
 public class SongContent {
     private String hash;
 
-    private Integer index;
+    private Integer idx;
 
     private String name;
 
@@ -29,18 +29,18 @@ public class SongContent {
         // default constructor
     }
 
-    public SongContent(String hash, Integer index, String name) {
+    public SongContent(String hash, Integer idx, String name) {
         this.hash = hash;
-        this.index = index;
+        this.idx = idx;
         this.name = name;
     }
 
-    public Integer getIndex() {
-        return index;
+    public Integer getIdx() {
+        return idx;
     }
 
-    public void setIndex(Integer index) {
-        this.index = index;
+    public void setIdx(Integer idx) {
+        this.idx = idx;
     }
 
     public String getHash() {

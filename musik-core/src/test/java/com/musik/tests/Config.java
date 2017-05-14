@@ -16,31 +16,41 @@
  * limitations under the License.
  */
 
-package com.musik;
+package com.musik.tests;
 
-import com.musik.config.Config;
-import com.musik.config.ConfigFactory;
-import com.musik.server.WebServer;
+import com.musik.config.Argument;
 
-import org.apache.log4j.Logger;
+public class Config {
+    @Argument
+    private String name;
 
-public class WebApp {
-    private static final Logger LOGGER = Logger.getLogger(WebApp.class);
+    @Argument
+    private Integer age;
 
-    public static void main(String[] args) {
-        final Config config = ConfigFactory.load(args, Config.class);
+    @Argument("income")
+    private Float salary;
 
-        final WebServer server = new WebServer(config);
+    public String getName() {
+        return name;
+    }
 
-        // wait for kill signal
-        Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
+    public void setName(String name) {
+        this.name = name;
+    }
 
-        try {
-            LOGGER.info("Web server starting ...");
+    public Integer getAge() {
+        return age;
+    }
 
-            server.start();
-        } catch (Throwable t) {
-            LOGGER.fatal(t.getMessage(), t);
-        }
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public Float getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Float salary) {
+        this.salary = salary;
     }
 }

@@ -18,12 +18,22 @@
 
 package com.musik.index.functions
 
-import com.google.common.io.Files
 import com.musik.index.{ComplexNumber, Transformer}
-import org.apache.hadoop.io.{BytesWritable, Text}
 
 object TimeToFrequency {
   private[this] val transformer = new Transformer
+
+  /**
+    * Returns the file name without extension
+    *
+    * @param name the name of the file to trim the extension from
+    * @return the file name without its path or extension
+    */
+  def getName(name: String): String = {
+    val index = name.lastIndexOf('.')
+
+    if (index == -1) name else name.substring(0, index)
+  }
 
   /**
     * Converts Hadoop input to frequency based complex numbers
@@ -31,13 +41,13 @@ object TimeToFrequency {
     * @param obj the input that contains audio content
     * @return the complex numbers array which is converted to frequency domain
     */
-  def apply(obj: (Text, BytesWritable)): (String, Array[Array[ComplexNumber]]) = {
+  def apply(obj: (String, Array[Byte])): (String, Array[Array[ComplexNumber]]) = {
     if (obj == null || obj._2 == null) {
       return null
     }
 
-    val name = Files.getNameWithoutExtension(obj._1.toString)
-    val frequencyData = transformer.transform(obj._2.getBytes, obj._2.getBytes.length)
+    val name = getName(obj._1.toString)
+    val frequencyData = transformer.transform(obj._2, Transformer.DEFAULT_SIZE)
 
     (name, frequencyData)
   }
