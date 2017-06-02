@@ -18,14 +18,15 @@
 
 package com.musik.index
 
+import com.musik.Utils
 import com.musik.config.ConfigFactory
 import com.musik.config.batch.Config
 import com.musik.index.functions.{AudioHash, PeakPoints, TimeToFrequency}
-import com.musik.index.transport.CassandraTransport
+import com.musik.index.utils.Batch
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.batch.connectors.cassandra.CassandraOutputFormat
 
-object BatchApp extends CassandraTransport {
+object BatchApp extends Batch {
   def main(args: Array[String]): Unit = {
     // load configuration according to command line arguments
     val config = ConfigFactory.load(args, classOf[Config])
@@ -46,7 +47,7 @@ object BatchApp extends CassandraTransport {
       val source = env.createInput(getFormat(input))
 
       // convert flink's java tuples to scala tuples
-      val signals = source.map(f => (f.f0.toString, f.f1.getBytes))
+      val signals = source.map(f => (f.f0.toString, getSignal(f.f1.getBytes)))
 
       // transform time domain signals to frequency domain
       val frequencies = signals.map(f => TimeToFrequency(f)).filter(f => f != null)
@@ -57,13 +58,17 @@ object BatchApp extends CassandraTransport {
       // generate hashes from magnitudes and generate row tuples from hashes
       val rows = points.map(p => AudioHash(p)).flatMap(p => p).map(s => toTuple(s))
 
-      val sql = s"INSERT INTO $db.$table (hash, idx, name) VALUES (?, ?, ?)"
-      val cluster = getCluster(host, port, username, password)
+      if (config.getTest != 1) {
+        val sql = s"INSERT INTO $db.$table (hash, idx, name) VALUES (?, ?, ?)"
+        val cluster = getCluster(host, port, username, password)
 
-      // write tuples
-      rows.output(new CassandraOutputFormat[Tuple](sql, cluster))
+        // write tuples
+        rows.output(new CassandraOutputFormat[Tuple](sql, cluster))
+      } else {
+        rows.print()
+      }
 
-      env.execute()
+      env.execute("musik batch")
     } catch {
       case t: Throwable => logger.fatal(t.getMessage, t)
     }

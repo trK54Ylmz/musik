@@ -18,9 +18,18 @@
 
 package com.musik;
 
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.text.MessageFormat;
 
 public class Utils {
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static final int SAMPLE_SIZE = 32768;
+
+    public static final int HASH_SIZE = 32;
+
     /**
      * Formats given text according to parameters
      *
@@ -34,5 +43,14 @@ public class Utils {
         }
 
         return MessageFormat.format(text, args);
+    }
+
+    /**
+     * Formats current date time
+     *
+     * @return formatted current date time
+     */
+    public static String now() {
+        return TIME_FORMAT.print(System.currentTimeMillis());
     }
 }

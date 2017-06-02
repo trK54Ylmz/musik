@@ -16,22 +16,20 @@
  * limitations under the License.
  */
 
-package com.musik.index.transport
+package com.musik.search;
 
-import com.musik.db.entity.SongContent
-import org.apache.flink.api.java.tuple.Tuple3
-import org.apache.log4j.Logger
+import redis.clients.jedis.Jedis;
 
-trait BaseApp {
-  private[index] val logger: Logger = Logger.getLogger(getClass)
+public class RedisCluster {
+    private final Jedis redis;
 
-  type Tuple = Tuple3[String, Int, String]
+    public RedisCluster(String host) {
+        String[] pairs = host.split(":");
 
-  /**
-    * Converts song entity to flink tuple
-    *
-    * @param song the song entity
-    * @return the flink tuple
-    */
-  def toTuple(song: SongContent): Tuple = new Tuple(song.getHash, song.getIdx, song.getName)
+        redis = new Jedis(pairs[0], Integer.parseInt(pairs[1]));
+    }
+
+    public Jedis get() {
+        return redis;
+    }
 }

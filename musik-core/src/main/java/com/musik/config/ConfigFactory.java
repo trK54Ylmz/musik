@@ -119,8 +119,14 @@ public class ConfigFactory {
                     continue;
                 }
 
+                Object value = cast(option.getValue(), field.getType());
+
+                if (value == null) {
+                    continue;
+                }
+
                 Method method = new PropertyDescriptor(field.getName(), tClass).getWriteMethod();
-                method.invoke(instance, cast(option.getValue(), field.getType()));
+                method.invoke(instance, value);
             }
         }
 

@@ -42,7 +42,7 @@ public class Config {
     @Argument(value = "kafka")
     private String kafkaServers;
 
-    @Argument
+    @Argument(value = "zookeeper")
     private String zookeeperServers;
 
     @Argument(value = "topics")
@@ -50,6 +50,15 @@ public class Config {
 
     @Argument(value = "group_id")
     private String groupId;
+
+    @Argument
+    private String redis;
+
+    @Argument(value = "name")
+    private String clusterName;
+
+    @Argument(hasValue = false)
+    private boolean test;
 
     public String getHost() {
         return host;
@@ -129,5 +138,29 @@ public class Config {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public String getRedis() {
+        return redis;
+    }
+
+    public void setRedis(String redis) {
+        this.redis = redis;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
+    }
+
+    public boolean isTest() {
+        return test;
+    }
+
+    public void setTest(boolean test) {
+        this.test = test;
     }
 }

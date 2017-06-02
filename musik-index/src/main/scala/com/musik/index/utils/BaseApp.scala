@@ -16,19 +16,32 @@
  * limitations under the License.
  */
 
-package com.musik.index.transport
+package com.musik.index.utils
+
+import java.io.ByteArrayInputStream
 
 import com.datastax.driver.core.Cluster
-import com.musik.fs.BinaryFileInputFormat
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.java.hadoop.mapreduce.HadoopInputFormat
-import org.apache.flink.api.java.tuple.Tuple2
-import org.apache.flink.api.java.typeutils.TupleTypeInfo
-import org.apache.flink.hadoopcompatibility.HadoopInputs
+import com.musik.db.entity.SongContent
+import com.musik.io.AudioReader
+import org.apache.flink.api.java.tuple.Tuple3
 import org.apache.flink.streaming.connectors.cassandra.ClusterBuilder
-import org.apache.hadoop.io.{BytesWritable, Text}
+import org.apache.log4j.Logger
 
-class CassandraTransport extends BaseApp {
+trait BaseApp {
+  private[index] val logger: Logger = Logger.getLogger(getClass)
+
+  private[index] val reader = new AudioReader()
+
+  type Tuple = Tuple3[String, Int, String]
+
+  /**
+    * Converts song entity to flink tuple
+    *
+    * @param song the song entity
+    * @return the flink tuple
+    */
+  def toTuple(song: SongContent): Tuple = new Tuple(song.getHash, song.getIdx, song.getName)
+
   /**
     * Generates cluster builder
     *
@@ -47,24 +60,12 @@ class CassandraTransport extends BaseApp {
   }
 
   /**
-    * Creates hadoop input format for reading binary signals
+    * Returns content of audio signal
     *
-    * @param input the input path of coming or cold signals
-    * @return the hadoop input format for flink data sets
+    * @param bytes the encoded audio signal
+    * @return the content of audio signal
     */
-  def getFormat(input: String): HadoopInputFormat[Text, BytesWritable] = {
-    val key = classOf[Text]
-    val value = classOf[BytesWritable]
-
-    // hadoop key type information that represents file name etc.
-    val stringInfo: TypeInformation[Text] = TypeInformation.of(classOf[Text])
-
-    // hadoop value type information that represents signal content as byte array etc.
-    val bytesInfo: TypeInformation[BytesWritable] = TypeInformation.of(classOf[BytesWritable])
-
-    // hadoop input type description
-    implicit val typeInfo = new TupleTypeInfo[Tuple2[Text, BytesWritable]](stringInfo, bytesInfo)
-
-    HadoopInputs.readHadoopFile(new BinaryFileInputFormat, key, value, input)
+  def getSignal(bytes: Array[Byte]): Array[Byte] = {
+    reader.read(new ByteArrayInputStream(bytes))
   }
 }

@@ -2,7 +2,8 @@ CREATE KEYSPACE musik WITH replication = {'class': 'SimpleStrategy', 'replicatio
     AND durable_writes = false;
 
 CREATE TABLE signals (
-    hash ASCII PRIMARY KEY,
+    hash ASCII,
     name TEXT,
-    idx INT
+    idx INT,
+    PRIMARY KEY (hash, idx)
 );

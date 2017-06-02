@@ -18,15 +18,67 @@
 
 package com.musik.index
 
+import com.datastax.driver.core.Session
 import com.musik.config.ConfigFactory
 import com.musik.config.streaming.Config
-import com.musik.index.BatchApp.getCluster
 import com.musik.index.functions.{AudioHash, PeakPoints, TimeToFrequency}
-import com.musik.index.transport.KafkaTransport
-import org.apache.flink.batch.connectors.cassandra.CassandraInputFormat
+import com.musik.index.utils.Streaming
+import com.musik.search.{CassandraCluster, RedisCluster}
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
 
-object StreamingApp extends KafkaTransport {
+import scala.collection.JavaConversions._
+
+object StreamingApp extends Streaming {
+  /**
+    * Loads matched signals from Cassandra server according to hash value
+    *
+    * @param cassandra the Cassandra cluster client
+    * @param db        the db name
+    * @param table     the table name
+    * @param row       the matched signal hashes
+    * @return the matched rows
+    */
+  def load(cassandra: CassandraCluster, db: String, table: String, row: Tuple): List[Tuple] = {
+    var client: Session = null
+
+    val sql = s"SELECT idx, name FROM $db.$table WHERE hash = ?"
+
+    try {
+      client = cassandra.getCluster.connect()
+
+      val results = client.execute(sql, row.f0)
+
+      results.all.map(r => new Tuple(row.f2, r.getInt(0), r.getString(1))).toList
+    } finally {
+      if (client != null) {
+        client.close()
+      }
+    }
+  }
+
+  /**
+    * Writes matches to Redis server
+    *
+    * @param redis the Redis cluster client
+    * @param rows  the matched signals
+    */
+  def write(redis: RedisCluster, rows: List[Tuple]): Unit = {
+    val client = redis.get
+
+    for (i <- rows.indices) {
+      val key = rows(i).f0
+
+      client.hset(key, "idx", rows(i).f1.toString)
+      client.hset(key, "name", rows(i).f2)
+
+      if (logger.isDebugEnabled) {
+        logger.debug(s"${rows(i).f0} matched ${rows(i).f2}")
+      }
+    }
+
+    client.close()
+  }
+
   def main(args: Array[String]): Unit = {
     // load configuration according to command line arguments
     val config = ConfigFactory.load(args, classOf[Config])
@@ -37,23 +89,30 @@ object StreamingApp extends KafkaTransport {
     val username = config.getUsername
     val password = config.getPassword
     val table = config.getTable
+    val redisHost = config.getRedis
+    val name = config.getClusterName
 
     try {
+      lazy val redis = new RedisCluster(redisHost)
+
+      lazy val cassandra = new CassandraCluster(host, port, username, password, name)
+
       // generate execution environment for the current streaming application
       val env = StreamExecutionEnvironment.getExecutionEnvironment
 
       val stream = env.addSource[StringBytePairs](getKafkaStream(config)).map(f => (f.f0, f.f1))
 
-      val frequencies = stream.map(f => TimeToFrequency(f)).filter(f => f != null)
+      val signals = stream.map(s => (s._1, s._2))
+
+      val frequencies = signals.map(f => TimeToFrequency(f)).filter(f => f != null)
+
       val points = frequencies.map(f => PeakPoints(f))
-      val samples = points.map(p => AudioHash(p)).flatMap(p => p).map(s => toTuple(s))
 
-      val sql = s"SELECT hash, idx, value FROM $db.$table WHERE hash = ?"
-      val cluster = getCluster(host, port, username, password)
+      val samples = points.map(p => AudioHash(p)).flatMap(p => p).filter(h => h != null).map(s => toTuple(s))
 
-      val data = new CassandraInputFormat[Tuple](sql, cluster)
+      samples.map(s => load(cassandra, db, table, s)).map(s => write(redis, s))
 
-
+      env.execute("musik streaming")
     } catch {
       case t: Throwable => logger.fatal(t.getMessage, t)
     }

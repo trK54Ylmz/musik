@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.musik.index.transport
+package com.musik.index.utils
 
 import java.util.Properties
 
@@ -28,7 +28,7 @@ import org.apache.flink.api.java.typeutils.TupleTypeInfo
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010
 import org.apache.flink.streaming.util.serialization.KeyedDeserializationSchema
 
-class KafkaTransport extends BaseApp {
+class Streaming extends BaseApp {
   type StringBytePairs = Tuple2[String, Array[Byte]]
 
   val schema = new KeyedDeserializationSchema[StringBytePairs] {
