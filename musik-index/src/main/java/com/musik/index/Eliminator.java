@@ -18,26 +18,26 @@
 
 package com.musik.index;
 
+import com.musik.Utils;
+
 import java.util.Arrays;
 
 public class Eliminator {
-    private static final int LIMIT = 16;
+    private final int EXPAND = 24;
 
     /**
      * Checks the magnitudes
      *
      * @return TRUE if all magnitudes are zero, FALSE otherwise
      */
-    private boolean isCorrect(byte[] magnitudes) {
-        for (int i = 0; i < magnitudes.length; i++) {
-            if (magnitudes[i] <= 0) {
-                continue;
-            }
+    private boolean isIncorrect(byte[] magnitudes) {
+        int count = 0;
 
-            return false;
+        for (int i = 0; i < magnitudes.length; i++) {
+            count += magnitudes[i];
         }
 
-        return true;
+        return count / magnitudes.length < EXPAND;
     }
 
     /**
@@ -59,16 +59,16 @@ public class Eliminator {
 
                 magnitude = Math.sqrt(magnitude);
 
-                sample[j] = (byte) (16 * Math.log10(magnitude));
+                sample[j] = (byte) (EXPAND * Math.log10(magnitude));
             }
 
-            if (isCorrect(sample)) {
+            if (isIncorrect(sample)) {
                 continue;
             }
 
             Arrays.sort(sample);
 
-            eliminated[i] = Arrays.copyOfRange(sample, sample.length - LIMIT, sample.length);
+            eliminated[i] = Arrays.copyOfRange(sample, sample.length - Utils.HASH_SIZE, sample.length);
         }
 
         return eliminated;

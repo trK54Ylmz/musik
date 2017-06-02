@@ -34,7 +34,7 @@ public class Transformer {
 
     private static final FastFourierTransformer FFT = new FastFourierTransformer(DftNormalization.STANDARD);
 
-    public static final int DEFAULT_SIZE = 16384;
+    public static final int DEFAULT_SIZE = Utils.SAMPLE_SIZE;
 
     /**
      * Executes fast fourier transformation to given input array

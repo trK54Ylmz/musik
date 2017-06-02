@@ -25,6 +25,7 @@ import javazoom.spi.mpeg.sampled.file.MpegAudioFileReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -46,6 +47,31 @@ public class AudioReader {
         Preconditions.checkNotNull(path, "File path name is empty");
 
         try (AudioInputStream is = READER.getAudioInputStream(new File(path));
+             AudioInputStream ais = AudioSystem.getAudioInputStream(FORMAT, is);
+             ByteArrayOutputStream bos = new ByteArrayOutputStream(ais.available())) {
+            int read;
+            final byte[] buffer = new byte[4096];
+
+            while ((read = ais.read(buffer)) > -1) {
+                bos.write(buffer, 0, read);
+            }
+
+            return bos.toByteArray();
+        } catch (UnsupportedAudioFileException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Read audio file from input stream and converts the content of song file as byte array
+     *
+     * @param audio the stream object of audio file
+     * @return the content of audio file
+     */
+    public byte[] read(InputStream audio) throws IOException {
+        Preconditions.checkNotNull(audio, "Audio signal is empty");
+
+        try (AudioInputStream is = READER.getAudioInputStream(audio);
              AudioInputStream ais = AudioSystem.getAudioInputStream(FORMAT, is);
              ByteArrayOutputStream bos = new ByteArrayOutputStream(ais.available())) {
             int read;

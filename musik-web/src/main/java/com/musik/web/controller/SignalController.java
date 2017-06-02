@@ -18,41 +18,19 @@
 
 package com.musik.web.controller;
 
-import com.google.common.io.ByteStreams;
-
 import com.musik.Utils;
+import com.musik.web.response.SignalSampleResponse;
 
-import org.apache.log4j.Logger;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-@Controller
-public class MainController {
-    private static final Logger LOGGER = Logger.getLogger(MainController.class);
-
-    @RequestMapping("/")
-    public String getMainPage(Model model) {
-        model.addAttribute("title", "Main page");
-        model.addAttribute("sample", Utils.SAMPLE_SIZE);
-
-        return "index";
-    }
-
-    @RequestMapping(value = "/favicon.ico", produces = MediaType.IMAGE_JPEG_VALUE)
+@RestController
+@RequestMapping("/signal")
+public class SignalController {
+    @RequestMapping("/sample")
     @ResponseBody
-    public byte[] getFavicon() {
-        try (InputStream is = getClass().getResourceAsStream("/assets/images/favicon.png")) {
-            return ByteStreams.toByteArray(is);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-
-        return new byte[]{0};
+    public SignalSampleResponse getSampleValue() {
+        return new SignalSampleResponse(true, Utils.SAMPLE_SIZE);
     }
 }

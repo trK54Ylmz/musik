@@ -42,6 +42,9 @@ public class Config {
     @Argument
     private String password;
 
+    @Argument
+    private int test;
+
     public String getInput() {
         return input;
     }
@@ -96,5 +99,13 @@ public class Config {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getTest() {
+        return test;
+    }
+
+    public void setTest(int test) {
+        this.test = test;
     }
 }
