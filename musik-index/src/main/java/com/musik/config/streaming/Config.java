@@ -58,7 +58,7 @@ public class Config {
     private String clusterName;
 
     @Argument(hasValue = false)
-    private boolean test;
+    private int test;
 
     public String getHost() {
         return host;
@@ -156,11 +156,11 @@ public class Config {
         this.clusterName = clusterName;
     }
 
-    public boolean isTest() {
+    public int getTest() {
         return test;
     }
 
-    public void setTest(boolean test) {
+    public void setTest(int test) {
         this.test = test;
     }
 }
