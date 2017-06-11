@@ -32,4 +32,8 @@ public class RedisCluster {
     public Jedis get() {
         return redis;
     }
+
+    public void close() {
+        redis.close();
+    }
 }

@@ -36,4 +36,8 @@ public class CassandraCluster {
     public Cluster getCluster() {
         return cluster;
     }
+
+    public void close() {
+        cluster.close();
+    }
 }
