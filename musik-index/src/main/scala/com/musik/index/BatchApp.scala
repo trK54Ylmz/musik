@@ -18,7 +18,6 @@
 
 package com.musik.index
 
-import com.musik.Utils
 import com.musik.config.ConfigFactory
 import com.musik.config.batch.Config
 import com.musik.index.functions.{AudioHash, PeakPoints, TimeToFrequency}

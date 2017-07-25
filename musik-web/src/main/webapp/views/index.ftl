@@ -24,14 +24,18 @@
         </div>
     </nav>
 
-    <div class="margin-top-large center">
+    <div id="inner-container" class="margin-top-large center">
         <input name="sample" type="hidden" class="hidden" value="${sample?c}"/>
+
+        <div class="hidden" id="loading">
+            <img src="/assets/images/octo-loader.gif" class="loading"/>
+        </div>
+
         <button class="btn btn-default" id="listen">Listen now ...</button>
     </div>
 </div>
 </#macro>
 
 <#macro script>
-<script src="/assets/js/mp3encoder.min.js"></script>
 <script src="/assets/js/main.js"></script>
 </#macro>

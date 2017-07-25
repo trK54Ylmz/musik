@@ -44,3 +44,7 @@ and the third one is user interface,
 ```bash
 $ java -jar musik-web-0.1.jar -port 8080
 ```
+
+# Special thanks
+
+* Andrew Embury - octo loader - [https://dribbble.com/aembury]

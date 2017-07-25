@@ -2,10 +2,19 @@
     margin-top: 16px;
 }
 
-.margin-top-large {
+.margin-top-medium {
     margin-top: 64px;
+}
+
+.margin-top-large {
+    margin-top: 128px;
 }
 
 .center {
     text-align: center;
+}
+
+.loading {
+    width: 260px;
+    margin: 40px;
 }
