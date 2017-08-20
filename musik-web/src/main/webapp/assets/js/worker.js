@@ -1,12 +1,11 @@
 var buffers = undefined;
 var encoder = undefined;
+var counter = 0;
 
 self.importScripts('/assets/js/mp3encoder.min.js');
 
 self.onmessage = function (event) {
     var data = event.data;
-
-    console.log(data);
 
     switch (data.command) {
         case "start":
@@ -14,8 +13,6 @@ self.onmessage = function (event) {
 
             encoder = new Mp3LameEncoder(data.sampleRate, data.bitRate);
             buffers = data.process === 'separate' ? [] : undefined;
-
-            console.log(data.process);
 
             break;
         case "record":
@@ -25,6 +22,10 @@ self.onmessage = function (event) {
                 encoder.encode(data.buffers);
             }
 
+            counter += buffers[0][0].length;
+
+            break;
+        case "draw":
             break;
         case "finish":
             if (buffers !== null) {

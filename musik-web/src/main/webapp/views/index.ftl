@@ -24,11 +24,13 @@
         </div>
     </nav>
 
-    <div id="inner-container" class="margin-top-large center">
+    <div id="inner-container" class="margin-top-medium center">
         <input name="sample" type="hidden" class="hidden" value="${sample?c}"/>
 
+        <div class="hidden" id="graph"></div>
+
         <div class="hidden" id="loading">
-            <img src="/assets/images/octo-loader.gif" class="loading"/>
+            <img src="/assets/images/octo-loader.gif" class="loading" />
         </div>
 
         <button class="btn btn-default" id="listen">Listen now ...</button>
@@ -37,5 +39,8 @@
 </#macro>
 
 <#macro script>
+<script src="/assets/js/mp3encoder.min.js"></script>
+<script src="/assets/js/d3.v3.min.js"></script>
+<script src="/assets/js/graph.js"></script>
 <script src="/assets/js/main.js"></script>
 </#macro>

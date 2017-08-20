@@ -16,5 +16,29 @@
 
 .loading {
     width: 260px;
-    margin: 40px;
+    margin: 0 40px 40px;
+}
+
+#graph .axis {
+    stroke-width: 1;
+}
+
+#graph .axis .tick line {
+    stroke: black;
+}
+
+#graph .axis .tick text {
+    fill: black;
+    font-size: 0.7em;
+}
+
+#graph .axis .domain {
+    fill: none;
+    stroke: black;
+}
+
+#graph .group {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.5;
 }

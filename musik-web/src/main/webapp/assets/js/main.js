@@ -1,14 +1,23 @@
 $(function () {
     var button = $("button#listen");
+    var graph = $("#graph");
     var loading = $("#loading");
     var container = $(".inner-container");
 
     var sample_size = parseInt($("input[name=sample]").val());
 
+    /**
+     * Print error message to error object
+     *
+     * @param msg the error message
+     */
     function error(msg) {
+        console.log(msg);
+
         $("#error").text(msg).removeClass("hidden");
     }
 
+    // sample size must be selected
     if (sample_size === null) {
         error('Invalid sample size');
 
@@ -17,12 +26,6 @@ $(function () {
 
     if (typeof AudioContext === 'undefined') {
         error('AudioContext does not support. Please upgrade your browser or change it!');
-
-        return
-    }
-
-    if (typeof Mp3LameEncoder === 'undefined') {
-        error('Mp3LameEncoder could not loaded! Please refresh the page');
 
         return
     }
@@ -37,6 +40,7 @@ $(function () {
         console.info("User media supported")
     }
 
+    // define script node
     if (ac.createScriptProcessor === null) {
         ac.createScriptProcessor = ac.createJavaScriptNode;
     } else {
@@ -45,46 +49,61 @@ $(function () {
 
     var volume = ac.createGain();
     var microphone = null;
-    var worker = null;
+    var recorder = null;
 
     function saveRecording(blob) {
         console.log(blob)
     }
 
+    /**
+     * Select one of the channels to read data
+     *
+     * @param event the event data that received by onaudioprocess
+     * @return Array the signal data
+     */
     function getBuffers(event) {
-        var buffers = [];
-
-        for (var ch = 0; ch < 2; ++ch) {
-            buffers[ch] = event.inputBuffer.getChannelData(ch);
-        }
-
-        return buffers;
+        return event.inputBuffer.getChannelData(0);
     }
 
+    // initiates recording from microphone etc.
     function startRecordingProcess() {
         var bufferSize = 4096;
         var bitRate = 192;
 
-        var processor = ac.createScriptProcessor(bufferSize, 2, 2);
+        var processor = ac.createScriptProcessor(bufferSize, 1, 1);
 
         microphone.connect(processor);
 
         processor.connect(ac.destination);
 
-        var message = {
+        var recordMsg = {
             command: "start",
             process: "separate",
             sampleRate: ac.sampleRate,
             bitRate: bitRate
         };
 
-        worker.postMessage(message);
+        recorder.postMessage(recordMsg);
 
+        // read signals from audio source
         processor.onaudioprocess = function (event) {
-            worker.postMessage({command: "record", buffers: getBuffers(event)});
+            var data = getBuffers(event);
+
+            recorder.postMessage({command: "record", buffers: data});
+
+            var counter = 0;
+
+            for (var val in data) {
+                counter += data[val];
+            }
+
+            var value = 50 + ((counter / data.length) * 128 * 128);
+
+            tick(value);
         };
     }
 
+    // create microphone connection
     function connect() {
         const connect = function (stream) {
             microphone = ac.createMediaStreamSource(stream);
@@ -104,6 +123,7 @@ $(function () {
 
     button.click(function () {
         button.attr("disabled", true);
+        graph.removeClass("hidden");
         loading.removeClass("hidden");
         container.removeClass("margin-top-large").addClass("margin-top");
 
@@ -111,6 +131,7 @@ $(function () {
             connect();
         }
 
+        // wait until microphone became available
         var interval = setInterval(function () {
             if (microphone === null) {
                 return
@@ -118,11 +139,13 @@ $(function () {
 
             clearInterval(interval);
 
-            worker = new Worker('/assets/js/worker.js');
+            recorder = new Worker('/assets/js/worker.js');
 
-            worker.onmessage = function (event) {
+            recorder.onmessage = function (event) {
                 saveRecording(event.data.blob);
             };
+
+            console.log("recording starting");
 
             startRecordingProcess();
         }, 1000);
