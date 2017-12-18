@@ -1,5 +1,6 @@
 $(function () {
     var button = $("button#listen");
+    var stop = $("button#stop");
     var graph = $("#graph");
     var loading = $("#loading");
     var container = $(".inner-container");
@@ -97,10 +98,25 @@ $(function () {
                 counter += data[val];
             }
 
-            var value = 50 + ((counter / data.length) * 128 * 128);
+            var value = 50 + ((counter / data.length) * 256 * 512);
+
+            if (value > 100 || value < -100) {
+                value = 50;
+            }
 
             tick(value);
         };
+    }
+
+    function stopRecordingProcess() {
+        recorder.postMessage({command: "cancel"});
+
+        microphone.disconnect();
+        recorder.terminate();
+
+        ac.suspend();
+
+        microphone = null;
     }
 
     // create microphone connection
@@ -123,9 +139,14 @@ $(function () {
 
     button.click(function () {
         button.attr("disabled", true);
+        stop.attr("disabled", null).removeClass("disabled");
         graph.removeClass("hidden");
         loading.removeClass("hidden");
         container.removeClass("margin-top-large").addClass("margin-top");
+
+        if (ac.state === "suspended") {
+            ac.resume();
+        }
 
         if (microphone === null) {
             connect();
@@ -149,5 +170,14 @@ $(function () {
 
             startRecordingProcess();
         }, 1000);
-    })
+    });
+
+    stop.click(function () {
+        stopRecordingProcess();
+
+        button.attr("disabled", false);
+        stop.attr("disabled", "").addClass("disabled");
+        graph.addClass("hidden");
+        loading.addClass("hidden");
+    });
 });

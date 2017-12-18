@@ -34,6 +34,7 @@
         </div>
 
         <button class="btn btn-default" id="listen">Listen now ...</button>
+        <button class="btn btn-danger disabled" id="stop" disabled>Stop</button>
     </div>
 </div>
 </#macro>
