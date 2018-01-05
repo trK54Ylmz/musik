@@ -5,6 +5,9 @@ $(function () {
     var loading = $("#loading");
     var container = $(".inner-container");
 
+    var bufferSize = 4096;
+    var bitRate = 192;
+
     var sample_size = parseInt($("input[name=sample]").val());
 
     /**
@@ -53,7 +56,7 @@ $(function () {
     var recorder = null;
 
     function saveRecording(blob) {
-        console.log(blob)
+        console.log(blob);
     }
 
     /**
@@ -68,14 +71,15 @@ $(function () {
 
     // initiates recording from microphone etc.
     function startRecordingProcess() {
-        var bufferSize = 4096;
-        var bitRate = 192;
-
         var processor = ac.createScriptProcessor(bufferSize, 1, 1);
 
         microphone.connect(processor);
 
         processor.connect(ac.destination);
+
+        var setMsg = {command: "set", bufferSize: bufferSize};
+
+        recorder.postMessage(setMsg);
 
         var recordMsg = {
             command: "start",
@@ -163,7 +167,28 @@ $(function () {
             recorder = new Worker('/assets/js/worker.js');
 
             recorder.onmessage = function (event) {
-                saveRecording(event.data.blob);
+                var command = event.data.command;
+
+                switch (command) {
+                    case "message":
+                        console.log(event.data.message);
+                        break;
+                    case "count":
+                        var count = event.data.count;
+
+                        if (count === bufferSize) {
+                            recorder.postMessage("finish")
+                        }
+
+                        break;
+                    case "blob":
+                        saveRecording(event.data.blob);
+                        break;
+                }
+            };
+
+            recorder.onerror = function (event) {
+                console.log(event);
             };
 
             console.log("recording starting");

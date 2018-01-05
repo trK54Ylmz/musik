@@ -1,5 +1,6 @@
 var buffers = undefined;
 var encoder = undefined;
+var bufferSize = 0;
 var counter = 0;
 
 self.importScripts('/assets/js/mp3encoder.min.js');
@@ -8,6 +9,11 @@ self.onmessage = function (event) {
     var data = event.data;
 
     switch (data.command) {
+        case "set":
+            console.log("variable set");
+
+            bufferSize = data.bufferSize;
+            break;
         case "start":
             console.log("started");
 
@@ -16,26 +22,28 @@ self.onmessage = function (event) {
 
             break;
         case "record":
-            if (buffers !== null) {
-                buffers.push(data.buffers);
-            } else {
-                encoder.encode(data.buffers);
+            var optimized_buffers = [];
+
+            for (var i = 0; i < data.buffers.length; i++) {
+                optimized_buffers.push(Math.round(data.buffers[i] * 128));
             }
 
-            counter += buffers[0][0].length;
-
-            break;
-        case "draw":
-            break;
-        case "finish":
-            if (buffers !== null) {
-                while (buffers.length > 0) {
-                    encoder.encode(buffers.shift());
-                }
+            if (buffers !== undefined) {
+                buffers.push(optimized_buffers);
             }
 
-            self.postMessage({blob: encoder.finish()});
-            encoder = undefined;
+            counter += buffers[0].length;
+
+            if (counter === bufferSize) {
+                encoder.encode(buffers);
+
+                var countMsg = {command: "data", data: encoder.finish()};
+
+                self.postMessage(countMsg);
+
+                counter = 0;
+                buffers = [];
+            }
 
             break;
         case "cancel":
