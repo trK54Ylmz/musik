@@ -15,6 +15,7 @@
         <guava.version>20.0</guava.version>
         <commons.cli.version>1.4</commons.cli.version>
         <jodatime.version>2.9.7</jodatime.version>
+        <mp3spi.version>1.9.5.4</mp3spi.version>
     </properties>
 
     <dependencies>
@@ -34,6 +35,12 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>${jodatime.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.soundlibs</groupId>
+            <artifactId>mp3spi</artifactId>
+            <version>${mp3spi.version}</version>
         </dependency>
     </dependencies>
 </project>

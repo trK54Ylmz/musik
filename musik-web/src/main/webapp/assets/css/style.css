@@ -42,3 +42,37 @@
     stroke: black;
     stroke-width: 1.5;
 }
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+.navbar a, .navbar a:hover, .navbar a:focus {
+    color: #333;
+}
+
+.gray {
+    color: #ccc;
+}
+
+#js-content, #native-content {
+    padding: 12px;
+    border: 1px solid #eee;
+}

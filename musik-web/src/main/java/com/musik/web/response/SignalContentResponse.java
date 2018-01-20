@@ -16,18 +16,26 @@
  * limitations under the License.
  */
 
-package com.musik.web.controller;
+package com.musik.web.response;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.List;
 
-@Controller
-public class SignalController {
-    @RequestMapping(value = "/test")
-    public String getContentPage(Model model) {
-        model.addAttribute("title", "Test signal sources");
+public class SignalContentResponse extends BasicStatusResponse {
+    private List<Integer> signals;
 
-        return "test";
+    public SignalContentResponse() {
+        // default constructor
+    }
+
+    public SignalContentResponse(Boolean status) {
+        super(status);
+    }
+
+    public List<Integer> getSignals() {
+        return signals;
+    }
+
+    public void setSignals(List<Integer> signals) {
+        this.signals = signals;
     }
 }
