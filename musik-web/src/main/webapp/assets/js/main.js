@@ -28,13 +28,16 @@ $(function () {
         return
     }
 
-    if (typeof AudioContext === 'undefined') {
+    if (typeof AudioContext === 'undefined' && typeof webkitAudioContext === 'undefined') {
         error('AudioContext does not support. Please upgrade your browser or change it!');
 
         return
     }
 
-    var ac = new AudioContext();
+    // safari uses webkitAudioContext
+    var cls = (typeof AudioContext !== 'undefined') ? AudioContext : webkitAudioContext;
+
+    var ac = new cls();
 
     // define navigator media
     if (!navigator.getUserMedia) {
@@ -63,7 +66,7 @@ $(function () {
      * Select one of the channels to read data
      *
      * @param event the event data that received by onaudioprocess
-     * @return Array the signal data
+     * @return Float32Array the signal data
      */
     function getBuffers(event) {
         return event.inputBuffer.getChannelData(0);
@@ -102,10 +105,12 @@ $(function () {
                 counter += data[val];
             }
 
-            var value = 50 + ((counter / data.length) * 256 * 512);
+            var value = 128 + (counter * 2);
 
-            if (value > 100 || value < -100) {
-                value = 50;
+            if (value > 256) {
+                value = 256;
+            } else if (value < 0) {
+                value = 0;
             }
 
             tick(value);

@@ -20,7 +20,7 @@
 }
 
 #graph .axis {
-    stroke-width: 1;
+    stroke-width: 1px;
 }
 
 #graph .axis .tick line {
@@ -40,7 +40,7 @@
 #graph .group {
     fill: none;
     stroke: black;
-    stroke-width: 1.5;
+    stroke-width: 1px;
 }
 
 .btn-file {
