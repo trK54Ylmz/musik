@@ -125,14 +125,17 @@ $(function () {
 
         var line = d3.svg.line().interpolate("basis").x(x_line()).y(y_line);
 
-        var svg = d3.select("#" + id).append("svg").attr("class", "chart").attr("width", width).attr("height", height);
+        var svg = d3.select("#" + id).append("svg").attr("class", "chart").attr("width", width)
+            .attr("height", height);
 
         var paths = svg.append("g");
 
         for (var name in groups) {
             var g = groups[name];
 
-            g.path = paths.append("path").data([g.data]).attr("class", name + " group").style("stroke", group.color);
+            g.path = paths.append("path").data([g.data])
+                .attr("class", name + " group")
+                .style("stroke", group.color);
         }
     }
 
@@ -149,9 +152,21 @@ $(function () {
         var callback = function (data) {
             var encoder = new Mp3LameEncoder(44100, 24);
 
-            encoder.encode(data);
+            encoder.encode([data, data]);
 
             var signals = encoder.finish();
+
+            var reader = new FileReader();
+
+            reader.addEventListener('loadend', function (e) {
+                console.log(e);
+
+                var text = e.srcElement.result;
+
+                console.log(text);
+            });
+
+            reader.readAsText(signals);
 
             draw_graph("js-graph", signals);
         };
@@ -189,7 +204,8 @@ $(function () {
                     draw_graph("native-graph", content);
                 },
                 error: function () {
-                    selected_error.text("Native application signal processing error").removeClass("hidden");
+                    selected_error.text("Native application signal processing error")
+                        .removeClass("hidden");
                 }
             };
 

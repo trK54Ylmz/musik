@@ -35,8 +35,6 @@ self.onmessage = function (event) {
             counter += buffers[0].length;
 
             if (counter === bufferSize) {
-                encoder.encode(buffers);
-
                 var countMsg = {command: "data", data: encoder.finish()};
 
                 self.postMessage(countMsg);
