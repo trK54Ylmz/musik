@@ -48,3 +48,4 @@ $ java -jar musik-web-0.1.jar -port 8080
 # Special thanks
 
 * Andrew Embury - octo loader - [https://dribbble.com/aembury]
+* Filippo Valsorda - mkcert - [https://github.com/FiloSottile/mkcert]

@@ -38,7 +38,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.IOException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 
 public class WebServer {
     private final Config config;
@@ -62,7 +61,7 @@ public class WebServer {
 
     /**
      * Enable SSL (HTTPS) support
-     *
+     * <p>
      * Audio inputs require SSL support for remote servers
      */
     private void enableSslSupport() throws Exception {
@@ -75,7 +74,7 @@ public class WebServer {
         final String password = "123654";
 
         KeyStore keyStore = KeyStore.getInstance("JKS");
-        keyStore.load(getClass().getResourceAsStream("/server.jks"), password.toCharArray());
+        keyStore.load(getClass().getResourceAsStream("/keystore.jks"), password.toCharArray());
 
         KeyStore trustStore = KeyStore.getInstance("JKS");
         trustStore.load(getClass().getResourceAsStream("/trust.jks"), password.toCharArray());

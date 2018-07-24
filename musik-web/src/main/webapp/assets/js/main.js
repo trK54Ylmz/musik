@@ -42,7 +42,7 @@ $(function () {
     // define navigator media
     if (!navigator.getUserMedia) {
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia
-                                 || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+            || navigator.mozGetUserMedia || navigator.msGetUserMedia;
     } else {
         console.info("User media supported")
     }
@@ -130,12 +130,12 @@ $(function () {
 
     // create microphone connection
     function connect() {
-        const connect = function (stream) {
+        var connect = function (stream) {
             microphone = ac.createMediaStreamSource(stream);
             microphone.connect(volume);
         };
 
-        const err = function (error) {
+        var err = function (error) {
             loading.addClass("hidden");
 
             console.log(error);
