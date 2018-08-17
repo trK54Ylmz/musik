@@ -22,11 +22,33 @@ public class Config {
     @Argument
     private Integer port;
 
+    @Argument("rpc_host")
+    private String rpcHost;
+
+    @Argument("rpc_port")
+    private Integer rpcPort;
+
     public Integer getPort() {
         return port;
     }
 
     public void setPort(Integer port) {
         this.port = port;
+    }
+
+    public String getRpcHost() {
+        return rpcHost;
+    }
+
+    public void setRpcHost(String rpcHost) {
+        this.rpcHost = rpcHost;
+    }
+
+    public Integer getRpcPort() {
+        return rpcPort;
+    }
+
+    public void setRpcPort(Integer rpcPort) {
+        this.rpcPort = rpcPort;
     }
 }

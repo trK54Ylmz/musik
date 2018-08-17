@@ -16,24 +16,43 @@
  * limitations under the License.
  */
 
-package com.musik.search;
+package com.musik.web.response;
 
-import redis.clients.jedis.Jedis;
+import java.util.ArrayList;
+import java.util.List;
 
-public class RedisCluster {
-    private final Jedis redis;
+public class SignalMatchResponse extends BasicStatusResponse {
+    public static class Song {
+        private String name;
 
-    public RedisCluster(String host) {
-        String[] pairs = host.split(":");
+        public Song(String name) {
+            this.name = name;
+        }
 
-        redis = new Jedis(pairs[0], Integer.parseInt(pairs[1]));
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 
-    public Jedis get() {
-        return redis;
+    public SignalMatchResponse() {
+        // default constructor
     }
 
-    public void close() {
-        redis.close();
+    public SignalMatchResponse(Boolean status) {
+        super(status);
+    }
+
+    private List<Song> matches = new ArrayList<>(5);
+
+    public List<Song> getMatches() {
+        return matches;
+    }
+
+    public void setMatches(List<Song> matches) {
+        this.matches = matches;
     }
 }

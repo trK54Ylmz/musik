@@ -18,6 +18,7 @@
 
 package com.musik;
 
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -51,6 +52,6 @@ public class Utils {
      * @return formatted current date time
      */
     public static String now() {
-        return TIME_FORMAT.print(System.currentTimeMillis());
+        return TIME_FORMAT.print(DateTime.now());
     }
 }

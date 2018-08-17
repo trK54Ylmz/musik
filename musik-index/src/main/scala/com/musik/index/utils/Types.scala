@@ -16,24 +16,13 @@
  * limitations under the License.
  */
 
-package com.musik.tests;
+package com.musik.index.utils
 
-import com.musik.config.ConfigFactory;
+import org.apache.flink.api.java.tuple.{Tuple2, Tuple3}
+import org.apache.hadoop.io.{BytesWritable, Text}
 
-import org.junit.Test;
+object Types {
+  type TupleTwo = Tuple2[Text, BytesWritable]
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
-public class ConfigTests {
-    @Test
-    public void testConfigParse() {
-        final String[] args = {"-name", "Test", "-age", "20", "-income", "1000.0"};
-
-        final Config config = ConfigFactory.load(args, Config.class);
-
-        assertThat(config.getName(), is("Test"));
-        assertThat(config.getSalary(), is(1000.f));
-        assertThat(config.getAge(), is(20));
-    }
+  type TupleThree = Tuple3[String, Int, String]
 }

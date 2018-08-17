@@ -16,14 +16,15 @@
  * limitations under the License.
  */
 
-package com.musik.index.utils
+package com.musik.index
 
 import java.io.ByteArrayInputStream
 
 import com.datastax.driver.core.Cluster
 import com.musik.db.entity.SongContent
 import com.musik.io.AudioReader
-import org.apache.flink.api.java.tuple.Tuple3
+import com.musik.index.utils.Types._
+
 import org.apache.flink.streaming.connectors.cassandra.ClusterBuilder
 import org.apache.log4j.Logger
 
@@ -32,15 +33,13 @@ trait BaseApp {
 
   private[index] val reader = new AudioReader()
 
-  type Tuple = Tuple3[String, Int, String]
-
   /**
     * Converts song entity to flink tuple
     *
     * @param song the song entity
     * @return the flink tuple
     */
-  def toTuple(song: SongContent): Tuple = new Tuple(song.getHash, song.getIdx, song.getName)
+  def toTuple(song: SongContent): TupleThree = new TupleThree(song.getHash, song.getIdx, song.getName)
 
   /**
     * Generates cluster builder

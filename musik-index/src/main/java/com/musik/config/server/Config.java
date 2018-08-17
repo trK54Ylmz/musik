@@ -16,14 +16,11 @@
  * limitations under the License.
  */
 
-package com.musik.config.batch;
+package com.musik.config.server;
 
 import com.musik.config.Argument;
 
 public class Config {
-    @Argument
-    private String input;
-
     @Argument
     private String host;
 
@@ -42,16 +39,14 @@ public class Config {
     @Argument
     private String password;
 
-    @Argument
+    @Argument("rpc_port")
+    private Integer rpcPort;
+
+    @Argument("name")
+    private String clusterName;
+
+    @Argument(hasValue = false)
     private int test;
-
-    public String getInput() {
-        return input;
-    }
-
-    public void setInput(String input) {
-        this.input = input;
-    }
 
     public String getHost() {
         return host;
@@ -99,6 +94,22 @@ public class Config {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Integer getRpcPort() {
+        return rpcPort;
+    }
+
+    public void setRpcPort(Integer rpcPort) {
+        this.rpcPort = rpcPort;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 
     public int getTest() {

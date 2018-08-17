@@ -19,13 +19,41 @@
 package com.musik.index
 
 import com.musik.config.ConfigFactory
-import com.musik.config.batch.Config
+import com.musik.config.index.Config
+import com.musik.fs.BinaryFileInputFormat
 import com.musik.index.functions.{AudioHash, PeakPoints, TimeToFrequency}
-import com.musik.index.utils.Batch
+import com.musik.index.utils.Types._
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.java.hadoop.mapreduce.HadoopInputFormat
+import org.apache.flink.api.java.typeutils.TupleTypeInfo
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.batch.connectors.cassandra.CassandraOutputFormat
+import org.apache.flink.hadoopcompatibility.HadoopInputs
+import org.apache.hadoop.io.{BytesWritable, Text}
 
-object BatchApp extends Batch {
+object IndexApp extends BaseApp {
+  /**
+    * Creates hadoop input format for reading binary signals
+    *
+    * @param input the input path of coming or cold signals
+    * @return the hadoop input format for flink data sets
+    */
+  def getFormat(input: String): HadoopInputFormat[Text, BytesWritable] = {
+    val key = classOf[Text]
+    val value = classOf[BytesWritable]
+
+    // hadoop key type information that represents file name etc.
+    val stringInfo: TypeInformation[Text] = TypeInformation.of(key)
+
+    // hadoop value type information that represents signal content as byte array etc.
+    val bytesInfo: TypeInformation[BytesWritable] = TypeInformation.of(value)
+
+    // hadoop input type description
+    implicit val typeInfo: TupleTypeInfo[TupleTwo] = new TupleTypeInfo[TupleTwo](stringInfo, bytesInfo)
+
+    HadoopInputs.readHadoopFile(new BinaryFileInputFormat, key, value, input)
+  }
+
   def main(args: Array[String]): Unit = {
     // load configuration according to command line arguments
     val config = ConfigFactory.load(args, classOf[Config])
@@ -49,10 +77,10 @@ object BatchApp extends Batch {
       val signals = source.map(f => (f.f0.toString, getSignal(f.f1.getBytes)))
 
       // transform time domain signals to frequency domain
-      val frequencies = signals.map(f => TimeToFrequency(f)).filter(f => f != null)
+      val frequencies = signals.map(f => TimeToFrequency(f)).filter(_ != null)
 
       // find peak points of signal magnitudes
-      val points = frequencies.map(f => PeakPoints(f))
+      val points = frequencies.map(PeakPoints(_))
 
       // generate hashes from magnitudes and generate row tuples from hashes
       val rows = points.map(p => AudioHash(p)).flatMap(p => p).map(s => toTuple(s))
@@ -62,7 +90,7 @@ object BatchApp extends Batch {
         val cluster = getCluster(host, port, username, password)
 
         // write tuples
-        rows.output(new CassandraOutputFormat[Tuple](sql, cluster))
+        rows.output(new CassandraOutputFormat[TupleThree](sql, cluster))
       } else {
         rows.print()
       }

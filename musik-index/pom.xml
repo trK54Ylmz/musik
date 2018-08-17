@@ -16,8 +16,6 @@
         <scala.m.version>2.11</scala.m.version>
         <maven.scala.version>2.15.2</maven.scala.version>
         <flink.version>1.2.1</flink.version>
-        <flink.kafka.version>0.10</flink.kafka.version>
-        <redis.version>2.9.0</redis.version>
         <commons.math.version>3.6.1</commons.math.version>
         <commons.cli.version>1.3.1</commons.cli.version>
         <scalatest.version>2.2.6</scalatest.version>
@@ -74,26 +72,8 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-scala_${scala.m.version}</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka-${flink.kafka.version}_${scala.m.version}</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-cassandra_${scala.m.version}</artifactId>
             <version>${flink.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>${redis.version}</version>
         </dependency>
 
         <dependency>
@@ -144,17 +124,17 @@
                 <version>2.4.3</version>
                 <executions>
                     <execution>
-                        <id>make-batch-app</id>
+                        <id>make-index-app</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>${project.artifactId}-batch-${project.version}</finalName>
+                            <finalName>${project.artifactId}-${project.version}</finalName>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.musik.index.BatchApp</mainClass>
+                                    <mainClass>com.musik.index.IndexApp</mainClass>
                                 </transformer>
                             </transformers>
                             <filters>
@@ -171,17 +151,17 @@
                     </execution>
 
                     <execution>
-                        <id>make-streaming-app</id>
+                        <id>make-server-app</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>${project.artifactId}-streaming-${project.version}</finalName>
+                            <finalName>${project.artifactId}-server-${project.version}</finalName>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.musik.index.StreamingApp</mainClass>
+                                    <mainClass>com.musik.index.ServerApp</mainClass>
                                 </transformer>
                             </transformers>
                             <filters>

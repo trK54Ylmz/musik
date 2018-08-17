@@ -19,39 +19,71 @@
 package com.musik.web.controller;
 
 import com.google.common.base.Preconditions;
-
-import com.musik.Utils;
+import com.google.common.io.ByteSource;
 import com.musik.io.AudioReader;
+import com.musik.utils.ResponseUtils;
 import com.musik.web.response.SignalContentResponse;
-import com.musik.web.response.SignalSampleResponse;
-
 import org.apache.log4j.Logger;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@RestController
-@RequestMapping("/signal")
-public class SignalRequestController {
-    private static final Logger LOGGER = Logger.getLogger(SignalRequestController.class);
+@Controller
+@RequestMapping("/test")
+public class SignalTestController {
+    private static final Logger LOGGER = Logger.getLogger(SignalTestController.class);
+
+    private static final AudioReader READER = new AudioReader();
 
     private static final int LIMIT = 4096;
 
-    @RequestMapping("/sample")
-    @ResponseBody
-    public SignalSampleResponse getSampleValue() {
-        return new SignalSampleResponse(true, Utils.SAMPLE_SIZE);
+    @RequestMapping
+    public String getContentPage(Model model) {
+        model.addAttribute("title", "Test signal sources");
+
+        return "test";
     }
 
-    @RequestMapping(value = "/test/content")
+    @RequestMapping(value = "/native", produces = ResponseUtils.JSON, method = RequestMethod.POST)
+    @ResponseBody
+    public SignalContentResponse getNativeSignals(@RequestBody String data) {
+        SignalContentResponse response = new SignalContentResponse(false);
+
+        try {
+            if (!data.startsWith("data:audio/mp3")) {
+                response.setMessage("Invalid request body");
+
+                return response;
+            }
+
+            byte[] content = Base64.getDecoder().decode(data.substring(22));
+
+            byte[] signals = READER.read(ByteSource.wrap(content).openStream());
+
+            List<Integer> list = new ArrayList<>();
+            for (byte signal : signals) {
+                list.add((int) signal);
+            }
+
+            response.setSignals(list);
+            response.setStatus(true);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+
+        return response;
+    }
+
+    @RequestMapping(value = "/content")
     @ResponseBody
     public SignalContentResponse getContentOfFile(@RequestParam("file") String filePath) {
         Preconditions.checkNotNull(filePath, "File path must be entered");
@@ -73,7 +105,8 @@ public class SignalRequestController {
 
             int size = bytes.length > LIMIT ? LIMIT : bytes.length;
 
-            List<Integer> signals = IntStream.range(0, size)
+            List<Integer> signals = IntStream
+                    .range(0, size)
                     .map(idx -> (int) bytes[idx])
                     .boxed()
                     .collect(Collectors.toList());

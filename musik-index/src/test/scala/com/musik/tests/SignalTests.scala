@@ -18,12 +18,8 @@
 
 package com.musik.tests
 
-import java.util.Properties
-
 import com.google.common.io.ByteStreams
-import com.musik.index.Transformer
 import com.musik.io.AudioReader
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class SignalTests extends FunSuite with BeforeAndAfter with Matchers {
@@ -48,31 +44,5 @@ class SignalTests extends FunSuite with BeforeAndAfter with Matchers {
     signal = reader.read(path)
 
     data = ByteStreams.toByteArray(stream)
-  }
-
-  test("simple kafka write") {
-    val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
-    props.put("client.id", "musik")
-    props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-    props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
-
-    val size = (signal.length / Transformer.DEFAULT_SIZE) - 1
-
-    val producer = new KafkaProducer[String, Array[Byte]](props)
-
-    for (i <- 0 until size) {
-      val ds = Transformer.DEFAULT_SIZE
-      val slide = Transformer.DEFAULT_SIZE / 2
-
-      // take a sample of the audio
-      val range = signal.slice((i * ds) + slide, ((i + 1) * ds) + slide)
-
-      val record = new ProducerRecord[String, Array[Byte]](topic, 1, title, range)
-
-      producer.send(record)
-    }
-
-    producer.close()
   }
 }

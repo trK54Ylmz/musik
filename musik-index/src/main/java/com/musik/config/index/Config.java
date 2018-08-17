@@ -16,11 +16,14 @@
  * limitations under the License.
  */
 
-package com.musik.config.streaming;
+package com.musik.config.index;
 
 import com.musik.config.Argument;
 
 public class Config {
+    @Argument
+    private String input;
+
     @Argument
     private String host;
 
@@ -39,26 +42,16 @@ public class Config {
     @Argument
     private String password;
 
-    @Argument(value = "kafka")
-    private String kafkaServers;
-
-    @Argument(value = "zookeeper")
-    private String zookeeperServers;
-
-    @Argument(value = "topics")
-    private String kafkaTopics;
-
-    @Argument(value = "group_id")
-    private String groupId;
-
     @Argument
-    private String redis;
-
-    @Argument(value = "name")
-    private String clusterName;
-
-    @Argument(hasValue = false)
     private int test;
+
+    public String getInput() {
+        return input;
+    }
+
+    public void setInput(String input) {
+        this.input = input;
+    }
 
     public String getHost() {
         return host;
@@ -106,54 +99,6 @@ public class Config {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getKafkaServers() {
-        return kafkaServers;
-    }
-
-    public void setKafkaServers(String kafkaServers) {
-        this.kafkaServers = kafkaServers;
-    }
-
-    public String getZookeeperServers() {
-        return zookeeperServers;
-    }
-
-    public void setZookeeperServers(String zookeeperServers) {
-        this.zookeeperServers = zookeeperServers;
-    }
-
-    public String getKafkaTopics() {
-        return kafkaTopics;
-    }
-
-    public void setKafkaTopics(String kafkaTopics) {
-        this.kafkaTopics = kafkaTopics;
-    }
-
-    public String getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
-    public String getRedis() {
-        return redis;
-    }
-
-    public void setRedis(String redis) {
-        this.redis = redis;
-    }
-
-    public String getClusterName() {
-        return clusterName;
-    }
-
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
     }
 
     public int getTest() {
